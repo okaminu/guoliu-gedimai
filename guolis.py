@@ -6,6 +6,7 @@ import wx
 #import threading
 
 class Signal:
+    _fileCol = 3
     _lastFigure = 0
     _rolls = 0
     _rmsOrig = ''
@@ -18,7 +19,7 @@ class Signal:
     _skip = 0
     _limit = 0
     _freMark = 0.0
-    _displayParams = ''
+    _displayParams = 'g'
     _originalData = []
     _originalDataFreq = []
     _cleanData = []
@@ -29,7 +30,7 @@ class Signal:
     _cleanFreqFrame = [] #this one is made when each clean frame is converted to Freq and stacked (Freq frames stacked)
     _cleanTimeFrameFreq = [] # this one is made when full cleaned signal time interval is converted to freq spectrum
 
-    def __init__(self, rolls, frameSize, skip, skipFrames, freMark, displayParams):
+    def __init__(self, rolls, frameSize, skip, skipFrames, freMark):
         Signal._rolls = int(float(rolls))
         Signal._frameSize = int(frameSize)
         Signal._skip = int(float(skip))
@@ -39,9 +40,8 @@ class Signal:
         Signal._freMark = float(freMark)
         Signal._displayParams = displayParams
 
-    def _loadOriginal_File(self, location, fileCol):
+    def _loadOriginal_File(self, location):
         fileData1 = open(location, "r")
-        fileCol = int(float(fileCol))
         dialog = wx.ProgressDialog('Skaiciuoja duomenis', 'Prasome palaukti', Signal._limit, style=wx.PD_REMAINING_TIME)
 
         for itera in range(Signal._limit):
@@ -49,7 +49,7 @@ class Signal:
             if itera < Signal._skip:
                 continue
             dataRaw = re.split("\t", line)
-            data = float(dataRaw[fileCol-1])
+            data = float(dataRaw[self._fileCol-1])
             Signal._originalData.append(data)
             dialog.Update(itera)
         wx.CallAfter(dialog.Destroy)
@@ -219,8 +219,8 @@ class Signal:
 
 
 
-    def processSignalFromFile(self, location, fileCol):
-        Signal._loadOriginal_File(self, location, fileCol)
+    def processSignalFromFile(self, location):
+        Signal._loadOriginal_File(self, location)
         Signal._calcMeanFrame(self)
         Signal._cleanSignal(self)
         Signal._stackCleanSignalFrames_Time_Freq(self)
@@ -234,8 +234,8 @@ class Signal:
 
 def execCalc(event):
 
-    signal1 = Signal(inputRolls.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFrames.GetValue(), inputFreMark.GetValue(), inputParams.GetValue())
-    signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue(), inputFileCol.GetValue())
+    signal1 = Signal(inputRolls.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFrames.GetValue(), inputFreMark.GetValue())
+    signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
 
     # Draw the plot to the screen
     plt.show()
@@ -243,17 +243,15 @@ def execCalc(event):
 
 
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title="Guoliu gedimai v0.6", size=(400, 430)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title="Guoliu gedimai v0.6", size=(320, 350)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 300))
-inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(200, 20), value=('m6.txt'))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 260))
+inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
 inputSkip = wx.TextCtrl(frame,-1,pos=(180, 90), size=(50, 20), value=('17'))
 inputSkipFrames = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('1500'))
 inputFrame = wx.TextCtrl(frame,-1,pos=(180, 150), size=(50, 20), value=('1024'))
 inputRolls = wx.TextCtrl(frame,-1,pos=(180, 180), size=(80, 20), value=('10'))
-inputFileCol = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('3'))
-inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
-inputParams = wx.TextCtrl(frame,-1,pos=(180, 270), size=(50, 20), value=('g'))
+inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('0'))
 
 label0 = wx.StaticText(frame, -1, 'Guoliu Gedimai v0.6' , pos=(30, 20))
 font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
@@ -265,12 +263,9 @@ label2 = wx.StaticText(frame, -1, 'Praleisti eiluciu failuose' , pos=(15, 90))
 label5 = wx.StaticText(frame, -1, 'Praleisti apsisukimu' , pos=(15, 120))
 label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 150))
 label9 = wx.StaticText(frame, -1, 'Apsisukimu kiekis' , pos=(15, 180))
-label4 = wx.StaticText(frame, -1, 'Stulpelis' , pos=(15, 210))
-label13 = wx.StaticText(frame, -1,'Atzyma dazniuose (Hz)', pos=(15, 240))
-label10 = wx.StaticText(frame, -1,'Tipas, spalva(r, g, b)', pos=(15, 270))
-label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 300))
-label11 = wx.StaticText(frame, -1,"Pastabos: reikalingas katalogas 'matavimai'", pos=(15, 340))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 370))
+label13 = wx.StaticText(frame, -1,'Atzyma dazniuose (Hz)', pos=(15, 210))
+label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 260))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 290))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
