@@ -38,7 +38,7 @@ class Signal:
         Signal._limit = Signal._rolls * Signal._frameSize
         Signal._limit = Signal._skip + Signal._limit
         Signal._freMark = float(freMark)
-        Signal._displayParams = displayParams
+        Signal._displayParams = Signal._displayParams
 
     def _loadOriginal_File(self, location):
         fileData1 = open(location, "r")
@@ -161,7 +161,7 @@ class Signal:
                 number += sum ** 2
                 kiekN+=1
                 sum = 0
-        Signal._rmsCleanSignal = str((number / kiekN) ** (1.0/2))
+        Signal.rmsCleanSignal = str((number / kiekN) ** (1.0/2))
 
 
     def _displayTime(self, data):
@@ -201,8 +201,8 @@ class Signal:
         cleanDisplay = {'values' : Signal._cleanData, 'title' : 'Cleaned signal (Time)'+' RMS='+Signal.rmsClean+' m/s^2'}
         Signal._displayTime(self, {0:originalDisplay, 1: cleanDisplay})
 
-        meanDisplay = {'values' : Signal._meanFrame, 'title' : 'Mean frame (Time)'+' RMS='+Signal._rmsMean+' m/s^2'}
-        cleanFrameDisplay = {'values' : Signal._cleanTimeFrame, 'title' : 'Cleaned signal frame (Time)'+' RMS='+Signal._rmsCleanSignal+' m/s^2'}
+        meanDisplay = {'values' : Signal._meanFrame, 'title' : 'Mean frame (Time)'+' RMS='+Signal.rmsMean+' m/s^2'}
+        cleanFrameDisplay = {'values' : Signal._cleanTimeFrame, 'title' : 'Cleaned signal frame (Time)'+' RMS='+Signal.rmsCleanSignal+' m/s^2'}
         Signal._displayTime(self, {0:meanDisplay, 1: cleanFrameDisplay})
 
         origFreqDisplay = {'values' : Signal._originalDataFreq, 'title' : 'Original Signal (Freq)'}
