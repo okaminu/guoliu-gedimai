@@ -29,16 +29,23 @@ class Signal:
     _cleanTimeFrame = []
     _cleanFreqFrame = [] #this one is made when each clean frame is converted to Freq and stacked (Freq frames stacked)
     _cleanTimeFrameFreq = [] # this one is made when full cleaned signal time interval is converted to freq spectrum
+    _SingleRollTime = 0;
 
-    def __init__(self, rolls, frameSize, skip, skipFrames, freMark):
-        Signal._rolls = int(float(rolls))
+    def __init__(self, time, frameSize, skip, skipFramesTime, freMark, singleRollTime):
+        Signal._SingleRollTime = int(singleRollTime)
+        Signal._rolls = self.convertToRolls(time)
         Signal._frameSize = int(frameSize)
-        Signal._skip = int(float(skip))
-        Signal._skip = Signal._skip + (int(skipFrames) * Signal._frameSize)
+        Signal._skip = int(skip)
+        skipFrames = self.convertToRolls(skipFramesTime)
+        Signal._skip = Signal._skip + (skipFrames * Signal._frameSize)
         Signal._limit = Signal._rolls * Signal._frameSize
         Signal._limit = Signal._skip + Signal._limit
         Signal._freMark = float(freMark)
         Signal._displayParams = Signal._displayParams
+
+    def convertToRolls(self, time):
+        msTime = int(float(time)) * 1000
+        return int(float(msTime / Signal._SingleRollTime))
 
     def _loadOriginal_File(self, location):
         fileData1 = open(location, "r")
@@ -234,7 +241,7 @@ class Signal:
 
 def execCalc(event):
 
-    signal1 = Signal(inputRolls.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFrames.GetValue(), inputFreMark.GetValue())
+    signal1 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
 
     # Draw the plot to the screen
@@ -243,29 +250,31 @@ def execCalc(event):
 
 
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title="Guoliu gedimai v0.6", size=(320, 350)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title="Guoliu gedimai v0.6.5", size=(320, 370)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 260))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 270))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
-inputSkip = wx.TextCtrl(frame,-1,pos=(180, 90), size=(50, 20), value=('17'))
-inputSkipFrames = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('1500'))
+inputTime = wx.TextCtrl(frame,-1,pos=(180, 90), size=(50, 20), value=('5'))
+inputSkipFramesTime = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('25'))
 inputFrame = wx.TextCtrl(frame,-1,pos=(180, 150), size=(50, 20), value=('1024'))
-inputRolls = wx.TextCtrl(frame,-1,pos=(180, 180), size=(80, 20), value=('10'))
-inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('0'))
+inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 180), size=(50, 20), value=('20'))
+inputSkip = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('17'))
+inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
 
-label0 = wx.StaticText(frame, -1, 'Guoliu Gedimai v0.6' , pos=(30, 20))
+label0 = wx.StaticText(frame, -1, 'Guoliu Gedimai v0.6.5' , pos=(30, 20))
 font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 label0.SetFont(font)
 label0.SetForegroundColour(wx.Colour(14,181,56));
 frame.SetBackgroundColour(wx.Colour(225,225,225));
 label1 = wx.StaticText(frame, -1, 'Pirmas matavimu failas' , pos=(15, 60))
-label2 = wx.StaticText(frame, -1, 'Praleisti eiluciu failuose' , pos=(15, 90))
-label5 = wx.StaticText(frame, -1, 'Praleisti apsisukimu' , pos=(15, 120))
+label9 = wx.StaticText(frame, -1, 'Imtis (sekundes)' , pos=(15, 90))
+label5 = wx.StaticText(frame, -1, 'Praleisti (sekundes)' , pos=(15, 120))
 label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 150))
-label9 = wx.StaticText(frame, -1, 'Apsisukimu kiekis' , pos=(15, 180))
-label13 = wx.StaticText(frame, -1,'Atzyma dazniuose (Hz)', pos=(15, 210))
-label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 260))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 290))
+label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 180))
+label2 = wx.StaticText(frame, -1, 'Praleisti eiluciu failuose' , pos=(15, 210))
+label13 = wx.StaticText(frame, -1,'Atzyma dazniuose (Hz)', pos=(15, 240))
+label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 270))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 300))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
