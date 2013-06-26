@@ -76,6 +76,7 @@ class Signal:
         Signal._meanFrame = buffer
 
 
+
     def _cleanSignal(self):
 
         bufIter = 0
