@@ -3,6 +3,8 @@ import math
 import matplotlib.pyplot as plt
 import re
 import wx
+
+
 #import threading
 
 class Signal:
@@ -58,7 +60,7 @@ class Signal:
             dataRaw = re.split("\t", line)
             data = float(dataRaw[self._fileCol-1])
             Signal._originalData.append(data)
-            dialog.Update(itera)
+            # dialog.Update(itera)
         wx.CallAfter(dialog.Destroy)
 
     def _calcMeanFrame(self):
