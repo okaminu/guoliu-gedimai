@@ -3,6 +3,8 @@ import math
 import matplotlib.pyplot as plt
 import re
 import wx
+
+
 #import threading
 
 class Signal:
