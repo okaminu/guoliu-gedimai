@@ -35,19 +35,27 @@ class Signal:
 
     def __init__(self, time, frameSize, skip, skipFramesTime, freMark, singleRollTime):
         Signal._SingleRollTime = int(singleRollTime)
-        Signal._rolls = self.convertToRolls(time)
+        Signal._rolls = self.convertTimeToRolls(time)
         Signal._frameSize = int(frameSize)
         Signal._skip = int(skip)
-        skipFrames = self.convertToRolls(skipFramesTime)
+        skipFrames = self.convertTimeToRolls(skipFramesTime)
         Signal._skip = Signal._skip + (skipFrames * Signal._frameSize)
         Signal._limit = Signal._rolls * Signal._frameSize
         Signal._limit = Signal._skip + Signal._limit
         Signal._freMark = float(freMark)
         Signal._displayParams = Signal._displayParams
 
-    def convertToRolls(self, time):
+    def convertTimeToRolls(self, time):
         msTime = int(float(time)) * 1000
         return int(float(msTime / Signal._SingleRollTime))
+
+    def convertPointsToRolls(self, points):
+        return float(points / Signal._frameSize)
+
+    def convertRollsToTime(self, rolls):
+        rollsMs = float(rolls * Signal._SingleRollTime)
+        return  float(rollsMs / 1000)
+
 
     def _loadOriginal_File(self, location):
         fileData1 = open(location, "r")
@@ -174,7 +182,7 @@ class Signal:
         Signal.rmsCleanSignal = str((number / kiekN) ** (1.0/2))
 
 
-    def _displayTime(self, data):
+    def _displayTime(self, data, marking = 's'):
         Signal._lastFigure+=1
         plt.figure(Signal._lastFigure)
         subplots = 211
@@ -184,6 +192,20 @@ class Signal:
             plt.plot(range(0, len(data[iter]['values'])), data[iter]['values'], Signal._displayParams)
             plt.title(data[iter]['title'])
             subplots+=1
+
+            Lenght = float(len(data[iter]['values']))
+            xAxisMarkerValues = []
+            xAxisMarkerPlacement = [Lenght * 0, Lenght * 0.2, Lenght * 0.4, Lenght * 0.6, Lenght * 0.8, Lenght * 1]
+            for marker in range(len(xAxisMarkerPlacement)):
+                rolls = self.convertPointsToRolls(xAxisMarkerPlacement[marker])
+                if(marking == 's'):
+                    time = int(math.ceil(self.convertRollsToTime(rolls)))
+                elif(marking == 'ms'):
+                    time = self.convertRollsToTime(rolls)
+                xAxisMarkerValues.append(time)
+
+            xAxisMarkerValues[len(xAxisMarkerValues) -1] = str(xAxisMarkerValues[len(xAxisMarkerValues) -1]) + " s"
+            plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
 
 
     def _displayFreq(self, data):
@@ -209,11 +231,11 @@ class Signal:
     def displayAllData(self):
         originalDisplay = {'values' : Signal._originalData, 'title' : 'Original signal (Time)'+' RMS='+Signal.rmsOrig+' m/s^2'}
         cleanDisplay = {'values' : Signal._cleanData, 'title' : 'Cleaned signal (Time)'+' RMS='+Signal.rmsClean+' m/s^2'}
-        Signal._displayTime(self, {0:originalDisplay, 1: cleanDisplay})
+        Signal._displayTime(self, {0:originalDisplay, 1: cleanDisplay}, 's')
 
         meanDisplay = {'values' : Signal._meanFrame, 'title' : 'Mean frame (Time)'+' RMS='+Signal.rmsMean+' m/s^2'}
         cleanFrameDisplay = {'values' : Signal._cleanTimeFrame, 'title' : 'Cleaned signal frame (Time)'+' RMS='+Signal.rmsCleanSignal+' m/s^2'}
-        Signal._displayTime(self, {0:meanDisplay, 1: cleanFrameDisplay})
+        Signal._displayTime(self, {0:meanDisplay, 1: cleanFrameDisplay}, 'ms')
 
         origFreqDisplay = {'values' : Signal._originalDataFreq, 'title' : 'Original Signal (Freq)'}
         cleanFreqDisplay = {'values' : Signal._cleanDataFreq, 'title' : 'Cleaned Signal (Freq)'}
