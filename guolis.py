@@ -275,7 +275,7 @@ def execCalc(event):
 
 
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title="Guoliu gedimai v0.6.5", size=(320, 370)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title="Guoliu gedimai v0.6.6", size=(320, 370)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
 button = wx.Button(frame, label="Vykdyti", pos=(170, 270))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
@@ -286,7 +286,7 @@ inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 180), size=(50, 20), value=
 inputSkip = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('17'))
 inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
 
-label0 = wx.StaticText(frame, -1, 'Guoliu Gedimai v0.6.5' , pos=(30, 20))
+label0 = wx.StaticText(frame, -1, 'Guoliu Gedimai v0.6.6' , pos=(30, 20))
 font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 label0.SetFont(font)
 label0.SetForegroundColour(wx.Colour(14,181,56));
