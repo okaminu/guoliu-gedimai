@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import re
 import wx
 
-
+# Vytauto testas
 #import threading
 
 class Signal:
