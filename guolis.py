@@ -300,7 +300,7 @@ label5 = wx.StaticText(frame, -1, 'Praleisti (sekundes)' , pos=(15, 120))
 label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 150))
 label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 180))
 label2 = wx.StaticText(frame, -1, 'Praleisti eiluciu failuose' , pos=(15, 210))
-label13 = wx.StaticText(frame, -1,'Atzyma dazniuose (Hz)', pos=(15, 240))
+label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 240))
 label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 270))
 label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 300))
 label12.SetForegroundColour(wx.Colour(173,88,88));
