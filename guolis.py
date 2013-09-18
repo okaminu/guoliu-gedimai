@@ -251,7 +251,42 @@ class Signal:
         cleanFreqFrame2Display = {'values' : self._cleanFreqFrame, 'title' : 'Cleaned Signal Stacked Frequency Frames'}
         self._displayFreq({0: cleanFreqFrame2Display})
 
+    def substractFrom(self, signal2):
+        leng = min({len(signal2._originalData), len(self._originalData)})
+        for iter1 in range(leng):
+            self._originalData[iter1] -= signal2._originalData[iter1]
 
+        leng2 = min({len(signal2._cleanData), len(self._cleanData)})
+        for iter2 in range(leng2):
+            self._cleanData[iter2] -= signal2._cleanData[iter2]
+
+        leng3 = min({len(signal2._meanFrame), len(self._meanFrame)})
+        for iter4 in range(leng3):
+            self._meanFrame[iter4] -= signal2._meanFrame[iter4]
+
+        leng4 = min({len(signal2._cleanTimeFrame), len(self._cleanTimeFrame)})
+        for iter5 in range(leng4):
+            self._cleanTimeFrame[iter5] -= signal2._cleanTimeFrame[iter5]
+
+        leng5 = min({len(signal2._originalDataFreq), len(self._originalDataFreq)})
+        for iter6 in range(leng5):
+            self._originalDataFreq[iter6] -= signal2._originalDataFreq[iter6]
+
+        leng6 = min({len(signal2._cleanDataFreq), len(self._cleanDataFreq)})
+        for iter7 in range(leng6):
+            self._cleanDataFreq[iter7] -= signal2._cleanDataFreq[iter7]
+
+        leng7 = min({len(signal2._meanFrameFreq), len(self._meanFrameFreq)})
+        for iter8 in range(leng7):
+            self._meanFrameFreq[iter8] -= signal2._meanFrameFreq[iter8]
+
+        leng8 = min({len(signal2._cleanTimeFrame), len(self._cleanTimeFrameFreq)})
+        for iter9 in range(leng8):
+            self._cleanTimeFrameFreq[iter9] -= signal2._cleanTimeFrameFreq[iter9]
+
+        leng9 = min({len(signal2._cleanFreqFrame), len(self._cleanFreqFrame)})
+        for iter10 in range(leng9):
+            self._cleanFreqFrame[iter10] -= signal2._cleanFreqFrame[iter10]
 
 
     def processSignalFromFile(self, location):
@@ -265,29 +300,37 @@ class Signal:
         self._rmsCleaned()
         self._rmsMeanF()
         self._rmsCleanedSF()
-        self.displayAllData()
 
 def execCalc(event):
 
     signal1 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
+
+    if(inputFile2.GetValue() != ''):
+        signal2 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
+        signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
+        signal1.substractFrom(signal2)
+        del signal2
+
+    signal1.displayAllData()
     del signal1
     # Draw the plot to the screen
     plt.show()
 
 
-appTitle = 'Guoliu Gedimai v0.6.8'
+appTitle = 'Guoliu Gedimai v0.7'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(320, 370)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(320, 400)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 270))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 300))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
-inputTime = wx.TextCtrl(frame,-1,pos=(180, 90), size=(50, 20), value=('5'))
-inputSkipFramesTime = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('25'))
-inputFrame = wx.TextCtrl(frame,-1,pos=(180, 150), size=(50, 20), value=('1024'))
-inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 180), size=(50, 20), value=('20'))
-inputSkip = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('17'))
-inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
+inputFile2 = wx.TextCtrl(frame,-1,pos=(180, 90), size=(110, 20), value=(''))
+inputTime = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('5'))
+inputSkipFramesTime = wx.TextCtrl(frame,-1,pos=(180, 150), size=(50, 20), value=('25'))
+inputFrame = wx.TextCtrl(frame,-1,pos=(180, 180), size=(50, 20), value=('1024'))
+inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('20'))
+inputSkip = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('17'))
+inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 270), size=(50, 20), value=('0'))
 
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
 font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
@@ -295,14 +338,15 @@ label0.SetFont(font)
 label0.SetForegroundColour(wx.Colour(14,181,56));
 frame.SetBackgroundColour(wx.Colour(225,225,225));
 label1 = wx.StaticText(frame, -1, 'Pirmas matavimu failas' , pos=(15, 60))
-label9 = wx.StaticText(frame, -1, 'Imtis (sekundes)' , pos=(15, 90))
-label5 = wx.StaticText(frame, -1, 'Praleisti (sekundes)' , pos=(15, 120))
-label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 150))
-label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 180))
-label2 = wx.StaticText(frame, -1, 'Praleisti eiluciu failuose' , pos=(15, 210))
-label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 240))
-label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 270))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 300))
+label1 = wx.StaticText(frame, -1, 'Antras matavimu failas' , pos=(15, 90))
+label9 = wx.StaticText(frame, -1, 'Imtis (sekundes)' , pos=(15, 120))
+label5 = wx.StaticText(frame, -1, 'Praleisti (sekundes)' , pos=(15, 150))
+label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 180))
+label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 210))
+label2 = wx.StaticText(frame, -1, 'Praleisti eiluciu failuose' , pos=(15, 240))
+label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 270))
+label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 300))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 330))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
