@@ -222,7 +222,7 @@ class Signal:
                 plt.subplot(subplots)
             Lenght = float(len(data[iter]['values']))
             localFreMark = (Lenght / 25000) * self._freMark
-            plt.bar(localFreMark, max(data[iter]['values']), width=0.8)
+            plt.bar(localFreMark, max(data[iter]['values']), width=0.8, edgecolor = '#CCCCCC')
             plt.plot(range(0, int(Lenght)), data[iter]['values'], self._displayParams)
             plt.title(data[iter]['title'])
             xAxisMarkerPlacement = [Lenght * 0, Lenght * 0.2, Lenght * 0.4, Lenght * 0.6, Lenght * 0.8, Lenght * 1]
