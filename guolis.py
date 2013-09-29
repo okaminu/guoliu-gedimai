@@ -3,6 +3,7 @@ import math
 import matplotlib.pyplot as plt
 import re
 import wx
+import copy
 
 # Vytauto testas
 #import threading
@@ -87,7 +88,6 @@ class Signal:
             if bufIter == frameSize:
                 bufIter=0
         self._meanFrame = buffer
-
 
 
     def _cleanSignal(self):
@@ -185,14 +185,14 @@ class Signal:
         self.rmsCleanSignal = str((number / kiekN) ** (1.0/2))
 
 
-    def _displayTime(self, data, marking = 's'):
+    def _displayTime(self, data, displayParams, marking = 's'):
         self._lastFigure+=1
         plt.figure(self._lastFigure)
         subplots = 211
         for iter in range(len(data)):
             if(len(data) > 1):
                 plt.subplot(subplots)
-            plt.plot(range(0, len(data[iter]['values'])), data[iter]['values'], self._displayParams)
+            plt.plot(range(0, len(data[iter]['values'])), data[iter]['values'], displayParams)
             plt.title(data[iter]['title'])
             subplots+=1
 
@@ -211,8 +211,8 @@ class Signal:
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
 
 
-    def _displayFreq(self, data):
-        self._lastFigure+=1
+    def _displayFreq(self, data, displayParams):
+        self._lastFigure +=1
         xAxisMarkerValues = ['0', '5', '10', '15', '20', '25 kHz']
         plt.figure(self._lastFigure)
         subplots = 211
@@ -223,7 +223,7 @@ class Signal:
             Lenght = float(len(data[iter]['values']))
             localFreMark = (Lenght / 25000) * self._freMark
             plt.bar(localFreMark, max(data[iter]['values']), width=0.8, edgecolor = '#CCCCCC')
-            plt.plot(range(0, int(Lenght)), data[iter]['values'], self._displayParams)
+            plt.plot(range(0, int(Lenght)), data[iter]['values'], displayParams)
             plt.title(data[iter]['title'])
             xAxisMarkerPlacement = [Lenght * 0, Lenght * 0.2, Lenght * 0.4, Lenght * 0.6, Lenght * 0.8, Lenght * 1]
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
@@ -231,62 +231,64 @@ class Signal:
             subplots+=1
 
 
-    def displayAllData(self):
+    def displayAllData(self, color):
+        displayParams = color;
         originalDisplay = {'values' : self._originalData, 'title' : 'Original signal (Time)'+' RMS='+self.rmsOrig+' m/s^2'}
         cleanDisplay = {'values' : self._cleanData, 'title' : 'Cleaned signal (Time)'+' RMS='+self.rmsClean+' m/s^2'}
-        self._displayTime({0:originalDisplay, 1: cleanDisplay}, 's')
+        self._displayTime({0:originalDisplay, 1: cleanDisplay}, displayParams, 's')
 
         meanDisplay = {'values' : self._meanFrame, 'title' : 'Mean frame (Time)'+' RMS='+self.rmsMean+' m/s^2'}
         cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Cleaned signal frame (Time)'+' RMS='+self.rmsCleanSignal+' m/s^2'}
-        self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, 'ms')
+        self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, displayParams,'ms')
 
         origFreqDisplay = {'values' : self._originalDataFreq, 'title' : 'Original Signal (Freq)'}
         cleanFreqDisplay = {'values' : self._cleanDataFreq, 'title' : 'Cleaned Signal (Freq)'}
-        self._displayFreq({0:origFreqDisplay, 1: cleanFreqDisplay})
+        self._displayFreq({0:origFreqDisplay, 1: cleanFreqDisplay}, displayParams)
 
         meanFreqFrameDisplay = {'values' : self._meanFrameFreq, 'title' : 'Mean Frame (Freq)'}
         cleanFreqFrameDisplay = {'values' : self._cleanTimeFrameFreq, 'title' : 'Cleaned signal Frame (Freq)'}
-        self._displayFreq({0:meanFreqFrameDisplay, 1: cleanFreqFrameDisplay})
+        self._displayFreq({0:meanFreqFrameDisplay, 1: cleanFreqFrameDisplay}, displayParams)
 
         cleanFreqFrame2Display = {'values' : self._cleanFreqFrame, 'title' : 'Cleaned Signal Stacked Frequency Frames'}
-        self._displayFreq({0: cleanFreqFrame2Display})
+        self._displayFreq({0: cleanFreqFrame2Display}, displayParams)
+        self._lastFigure = 0
 
     def substractFrom(self, signal2):
         leng = min({len(signal2._originalData), len(self._originalData)})
         for iter1 in range(leng):
-            self._originalData[iter1] -= signal2._originalData[iter1]
+            self._originalData[iter1] = abs(self._originalData[iter1] - signal2._originalData[iter1])
 
         leng2 = min({len(signal2._cleanData), len(self._cleanData)})
         for iter2 in range(leng2):
-            self._cleanData[iter2] -= signal2._cleanData[iter2]
+            self._cleanData[iter2] = abs(self._cleanData[iter2] - signal2._cleanData[iter2])
 
         leng3 = min({len(signal2._meanFrame), len(self._meanFrame)})
         for iter4 in range(leng3):
-            self._meanFrame[iter4] -= signal2._meanFrame[iter4]
+            self._meanFrame[iter4] = abs(self._meanFrame[iter4] - signal2._meanFrame[iter4])
 
         leng4 = min({len(signal2._cleanTimeFrame), len(self._cleanTimeFrame)})
         for iter5 in range(leng4):
-            self._cleanTimeFrame[iter5] -= signal2._cleanTimeFrame[iter5]
+            self._cleanTimeFrame[iter5] = abs(self._cleanTimeFrame[iter5] - signal2._cleanTimeFrame[iter5])
 
         leng5 = min({len(signal2._originalDataFreq), len(self._originalDataFreq)})
         for iter6 in range(leng5):
-            self._originalDataFreq[iter6] -= signal2._originalDataFreq[iter6]
+            self._originalDataFreq[iter6] = abs(self._originalDataFreq[iter6] - signal2._originalDataFreq[iter6])
 
         leng6 = min({len(signal2._cleanDataFreq), len(self._cleanDataFreq)})
         for iter7 in range(leng6):
-            self._cleanDataFreq[iter7] -= signal2._cleanDataFreq[iter7]
+            self._cleanDataFreq[iter7] = abs(self._cleanDataFreq[iter7] - signal2._cleanDataFreq[iter7])
 
         leng7 = min({len(signal2._meanFrameFreq), len(self._meanFrameFreq)})
         for iter8 in range(leng7):
-            self._meanFrameFreq[iter8] -= signal2._meanFrameFreq[iter8]
+            self._meanFrameFreq[iter8] = abs(self._meanFrameFreq[iter8] - signal2._meanFrameFreq[iter8])
 
         leng8 = min({len(signal2._cleanTimeFrame), len(self._cleanTimeFrameFreq)})
         for iter9 in range(leng8):
-            self._cleanTimeFrameFreq[iter9] -= signal2._cleanTimeFrameFreq[iter9]
+            self._cleanTimeFrameFreq[iter9] = abs(self._cleanTimeFrameFreq[iter9] - signal2._cleanTimeFrameFreq[iter9])
 
         leng9 = min({len(signal2._cleanFreqFrame), len(self._cleanFreqFrame)})
         for iter10 in range(leng9):
-            self._cleanFreqFrame[iter10] -= signal2._cleanFreqFrame[iter10]
+            self._cleanFreqFrame[iter10] = abs(self._cleanFreqFrame[iter10] - signal2._cleanFreqFrame[iter10])
 
 
     def processSignalFromFile(self, location):
@@ -309,10 +311,14 @@ def execCalc(event):
     if(inputFile2.GetValue() != ''):
         signal2 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
-        signal1.substractFrom(signal2)
+        signalDiff = copy.deepcopy(signal1)
+        signalDiff.substractFrom(signal2)
+        signalDiff.displayAllData('r')
+        signal2.displayAllData('b')
+        del signalDiff
         del signal2
 
-    signal1.displayAllData()
+    signal1.displayAllData('g')
     del signal1
     # Draw the plot to the screen
     plt.show()
