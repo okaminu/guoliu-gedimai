@@ -10,6 +10,9 @@ import copy
 
 class Signal:
 
+    signalNames = []
+    signalData = []
+
     def initValues(self):
         self._fileCol = 3
         self._lastFigure = 0
@@ -35,6 +38,7 @@ class Signal:
         self._cleanFreqFrame = [] #this one is made when each clean frame is converted to Freq and stacked (Freq frames stacked)
         self._cleanTimeFrameFreq = [] # this one is made when full cleaned signal time interval is converted to freq spectrum
         self._SingleRollTime = 0;
+        self.isDrawLegend = 0
 
     def __init__(self, time, frameSize, skip, skipFramesTime, freMark, singleRollTime):
         self.initValues();
@@ -207,8 +211,11 @@ class Signal:
                     time = self.convertRollsToTime(rolls)
                 xAxisMarkerValues.append(time)
 
+
             xAxisMarkerValues[len(xAxisMarkerValues) -1] = str(xAxisMarkerValues[len(xAxisMarkerValues) -1]) + " s"
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
+        if(self.isDrawLegend == 1):
+                self.drawLegend()
 
 
     def _displayFreq(self, data, displayParams):
@@ -227,12 +234,28 @@ class Signal:
             plt.title(data[iter]['title'])
             xAxisMarkerPlacement = [Lenght * 0, Lenght * 0.2, Lenght * 0.4, Lenght * 0.6, Lenght * 0.8, Lenght * 1]
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
-
             subplots+=1
 
+        if(self.isDrawLegend == 1):
+            self.drawLegend()
 
-    def displayAllData(self, color):
+    def getDrawLegend(self):
+        return self.isDrawLegend
+
+    def setDrawLegend(self, state):
+        self.isDrawLegend = state
+
+    def drawLegend(self):
+        plt.legend(self.signalData, self.signalNames,
+                   bbox_to_anchor=[0.5, 0], loc='upper center', ncol=3, borderaxespad=1)
+
+    def addToLegend(self, signalName, color):
+        self.signalNames.append(signalName)
+        self.signalData.append(plt.Rectangle([0,0],1,1, fc = color))
+
+    def displayAllData(self, color, signalName):
         displayParams = color;
+        self.addToLegend(signalName, color)
         originalDisplay = {'values' : self._originalData, 'title' : 'Original signal (Time)'+' RMS='+self.rmsOrig+' m/s^2'}
         cleanDisplay = {'values' : self._cleanData, 'title' : 'Cleaned signal (Time)'+' RMS='+self.rmsClean+' m/s^2'}
         self._displayTime({0:originalDisplay, 1: cleanDisplay}, displayParams, 's')
@@ -313,18 +336,19 @@ def execCalc(event):
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signalDiff = copy.deepcopy(signal1)
         signalDiff.substractFrom(signal2)
-        signalDiff.displayAllData('r')
-        signal2.displayAllData('b')
+        signalDiff.displayAllData('r', 'Skirtumas')
+        signal2.displayAllData('b', 'Antras')
         del signalDiff
         del signal2
 
-    signal1.displayAllData('g')
+    signal1.setDrawLegend(1)
+    signal1.displayAllData('g', 'Pirmas')
     del signal1
     # Draw the plot to the screen
     plt.show()
 
 
-appTitle = 'Guoliu Gedimai v0.7'
+appTitle = 'Guoliu Gedimai v0.7.1'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(320, 400)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
