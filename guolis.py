@@ -247,7 +247,7 @@ class Signal:
 
     def drawLegend(self):
         plt.legend(self.signalData, self.signalNames,
-                   bbox_to_anchor=[0.5, 0], loc='upper center', ncol=3, borderaxespad=1)
+                   bbox_to_anchor=[0.5, 0], loc='upper center', ncol=4, borderaxespad=1)
 
     def addToLegend(self, signalName, color):
         self.signalNames.append(signalName)
@@ -330,7 +330,7 @@ def execCalc(event):
 
     signal1 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
-
+    signal1.addToLegend('Rezonansas', '#CCCCCC')
     if(inputFile2.GetValue() != ''):
         signal2 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
