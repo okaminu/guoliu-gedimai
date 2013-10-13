@@ -40,12 +40,11 @@ class Signal:
         self._SingleRollTime = 0;
         self.isDrawLegend = 0
 
-    def __init__(self, time, frameSize, skip, skipFramesTime, freMark, singleRollTime):
+    def __init__(self, time, frameSize, skipFramesTime, freMark, singleRollTime):
         self.initValues();
         self._SingleRollTime = int(singleRollTime)
         self._rolls = self.convertTimeToRolls(time)
         self._frameSize = int(frameSize)
-        self._skip = int(skip)
         skipFrames = self.convertTimeToRolls(skipFramesTime)
         self._skip = self._skip + (skipFrames * self._frameSize)
         self._limit = self._rolls * self._frameSize
@@ -68,15 +67,17 @@ class Signal:
     def _loadOriginal_File(self, location):
         fileData1 = open(location, "r")
         dialog = wx.ProgressDialog('Skaiciuoja duomenis', 'Prasome palaukti', self._limit, style=wx.PD_REMAINING_TIME)
+        dataBegin = 0
 
         for itera in range(self._limit):
             line = fileData1.readline()
-            if itera < self._skip:
-                continue
-            dataRaw = re.split("\t", line)
-            data = float(dataRaw[self._fileCol-1])
-            self._originalData.append(data)
-            # dialog.Update(itera)
+            if itera >= self._skip and dataBegin == 1:
+                dataRaw = re.split("\t", line)
+                data = float(dataRaw[self._fileCol-1])
+                self._originalData.append(data)
+                # dialog.Update(itera)
+            if re.match("BEGIN_DATA", line):
+                dataBegin = 1
         wx.CallAfter(dialog.Destroy)
 
     def _calcMeanFrame(self):
@@ -256,23 +257,23 @@ class Signal:
     def displayAllData(self, color, signalName):
         displayParams = color;
         self.addToLegend(signalName, color)
-        originalDisplay = {'values' : self._originalData, 'title' : 'Original signal (Time)'+' RMS='+self.rmsOrig+' m/s^2'}
-        cleanDisplay = {'values' : self._cleanData, 'title' : 'Cleaned signal (Time)'+' RMS='+self.rmsClean+' m/s^2'}
+        originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'+' RMS='+self.rmsOrig+' m/s^2'}
+        cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'+' RMS='+self.rmsClean+' m/s^2'}
         self._displayTime({0:originalDisplay, 1: cleanDisplay}, displayParams, 's')
 
-        meanDisplay = {'values' : self._meanFrame, 'title' : 'Mean frame (Time)'+' RMS='+self.rmsMean+' m/s^2'}
-        cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Cleaned signal frame (Time)'+' RMS='+self.rmsCleanSignal+' m/s^2'}
+        meanDisplay = {'values' : self._meanFrame, 'title' : 'Originalo vidurkis (Laikas)'+' RMS='+self.rmsMean+' m/s^2'}
+        cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Centruoto vidurkis (Laikas)'+' RMS='+self.rmsCleanSignal+' m/s^2'}
         self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, displayParams,'ms')
 
-        origFreqDisplay = {'values' : self._originalDataFreq, 'title' : 'Original Signal (Freq)'}
-        cleanFreqDisplay = {'values' : self._cleanDataFreq, 'title' : 'Cleaned Signal (Freq)'}
+        origFreqDisplay = {'values' : self._originalDataFreq, 'title' : 'Originalus (Daznis)'}
+        cleanFreqDisplay = {'values' : self._cleanDataFreq, 'title' : 'Centruotas (Daznis)'}
         self._displayFreq({0:origFreqDisplay, 1: cleanFreqDisplay}, displayParams)
 
-        meanFreqFrameDisplay = {'values' : self._meanFrameFreq, 'title' : 'Mean Frame (Freq)'}
-        cleanFreqFrameDisplay = {'values' : self._cleanTimeFrameFreq, 'title' : 'Cleaned signal Frame (Freq)'}
+        meanFreqFrameDisplay = {'values' : self._meanFrameFreq, 'title' : 'Originalo vidurkis (Daznis)'}
+        cleanFreqFrameDisplay = {'values' : self._cleanTimeFrameFreq, 'title' : 'Centruoto vidurkis (Daznis)'}
         self._displayFreq({0:meanFreqFrameDisplay, 1: cleanFreqFrameDisplay}, displayParams)
 
-        cleanFreqFrame2Display = {'values' : self._cleanFreqFrame, 'title' : 'Cleaned Signal Stacked Frequency Frames'}
+        cleanFreqFrame2Display = {'values' : self._cleanFreqFrame, 'title' : 'Centruoto Signalo dazniu vidurkis'}
         self._displayFreq({0: cleanFreqFrame2Display}, displayParams)
         self._lastFigure = 0
 
@@ -328,11 +329,11 @@ class Signal:
 
 def execCalc(event):
 
-    signal1 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
+    signal1 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
     if(inputFile2.GetValue() != ''):
-        signal2 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
+        signal2 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signalDiff = copy.deepcopy(signal1)
         signalDiff.substractFrom(signal2)
@@ -348,19 +349,18 @@ def execCalc(event):
     plt.show()
 
 
-appTitle = 'Guoliu Gedimai v0.7.1'
+appTitle = 'Guoliu Gedimai v0.7.2'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(320, 400)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(320, 360)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 300))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 270))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(180, 90), size=(110, 20), value=(''))
 inputTime = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('5'))
 inputSkipFramesTime = wx.TextCtrl(frame,-1,pos=(180, 150), size=(50, 20), value=('25'))
 inputFrame = wx.TextCtrl(frame,-1,pos=(180, 180), size=(50, 20), value=('1024'))
 inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('20'))
-inputSkip = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('17'))
-inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 270), size=(50, 20), value=('0'))
+inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
 
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
 font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
@@ -373,10 +373,9 @@ label9 = wx.StaticText(frame, -1, 'Imtis (sekundes)' , pos=(15, 120))
 label5 = wx.StaticText(frame, -1, 'Praleisti (sekundes)' , pos=(15, 150))
 label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 180))
 label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 210))
-label2 = wx.StaticText(frame, -1, 'Praleisti eiluciu failuose' , pos=(15, 240))
-label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 270))
-label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 300))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 330))
+label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 240))
+label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 270))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 300))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
