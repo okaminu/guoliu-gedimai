@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import re
 import wx
 import copy
+import os
 
 # Vytauto testas
 #import threading
@@ -39,6 +40,7 @@ class Signal:
         self._cleanTimeFrameFreq = [] # this one is made when full cleaned signal time interval is converted to freq spectrum
         self._SingleRollTime = 0;
         self.isDrawLegend = 0
+        self.rmsLocation = "statistics/RMS/"
 
     def __init__(self, time, frameSize, skipFramesTime, freMark, singleRollTime):
         self.initValues();
@@ -151,7 +153,7 @@ class Signal:
             sum += ( math.pow(originalData[itera], 2))
         aver = sum / len(originalData)
 
-        self.rmsOrig = str(math.sqrt(aver))
+        return str(math.sqrt(aver))
 
     def _rmsCleaned (self):
         sum = 0
@@ -162,7 +164,7 @@ class Signal:
 
         aver = sum / len(cleanData)
 
-        self.rmsClean = str(math.sqrt(aver))
+        return str(math.sqrt(aver))
 
     def _rmsMeanF (self):
         sum = 0
@@ -174,7 +176,7 @@ class Signal:
 
         aver = sum / len(meanData)
 
-        self.rmsMean = str(math.sqrt(aver))
+        return str(math.sqrt(aver))
 
     def _rmsCleanedSF (self):
         sum = 0
@@ -187,8 +189,18 @@ class Signal:
                 number += sum ** 2
                 kiekN+=1
                 sum = 0
-        self.rmsCleanSignal = str((number / kiekN) ** (1.0/2))
+        return str((number / kiekN) ** (1.0/2))
 
+    def _saveRMS(self, fileName):
+
+        if(os.path.exists(self.rmsLocation) == 0):
+            os.makedirs(self.rmsLocation)
+
+        file = open(self.rmsLocation+fileName+".txt", 'w')
+        file.writelines("Originalus: "+ self._rmsOriginal() +"\n")
+        file.writelines("Centruotas: "+ self._rmsCleaned() +"\n")
+        file.writelines("Originalo vidurkintas: "+ self._rmsMean +"\n")
+        file.writelines("Centruoto vidurkintas: "+ self._rmsCleanedSF() +"\n")
 
     def _displayTime(self, data, displayParams, marking = 's'):
         self._lastFigure+=1
@@ -255,14 +267,16 @@ class Signal:
         self.signalData.append(plt.Rectangle([0,0],1,1, fc = color))
 
     def displayAllData(self, color, signalName):
+        self._saveRMS(signalName)
+
         displayParams = color;
         self.addToLegend(signalName, color)
-        originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'+' RMS='+self.rmsOrig+' m/s^2'}
-        cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'+' RMS='+self.rmsClean+' m/s^2'}
+        originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'}
+        cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'}
         self._displayTime({0:originalDisplay, 1: cleanDisplay}, displayParams, 's')
 
-        meanDisplay = {'values' : self._meanFrame, 'title' : 'Originalo vidurkis (Laikas)'+' RMS='+self.rmsMean+' m/s^2'}
-        cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Centruoto vidurkis (Laikas)'+' RMS='+self.rmsCleanSignal+' m/s^2'}
+        meanDisplay = {'values' : self._meanFrame, 'title' : 'Originalo vidurkis (Laikas)'}
+        cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Centruoto vidurkis (Laikas)'}
         self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, displayParams,'ms')
 
         origFreqDisplay = {'values' : self._originalDataFreq, 'title' : 'Originalus (Daznis)'}
@@ -321,11 +335,6 @@ class Signal:
         self._cleanSignal()
         self._stackCleanSignalFrames_Time_Freq()
         self._calcFreqSpectrums()
-
-        self._rmsOriginal()
-        self._rmsCleaned()
-        self._rmsMeanF()
-        self._rmsCleanedSF()
 
 def execCalc(event):
 
