@@ -42,12 +42,16 @@ class Signal:
         self.isDrawLegend = 0
         self.rmsLocation = "statistics/RMS/"
 
-    def __init__(self, time, frameSize, skipFramesTime, freMark, singleRollTime):
+    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime):
         self.initValues();
         self._SingleRollTime = int(singleRollTime)
-        self._rolls = self.convertTimeToRolls(time)
+        self._rolls = int(range)
+        if(isRangeTime == 1):
+            self._rolls = self.convertTimeToRolls(range)
         self._frameSize = int(frameSize)
-        skipFrames = self.convertTimeToRolls(skipFramesTime)
+        skipFrames = int(skip)
+        if(isSkipTime == 1):
+            skipFrames = self.convertTimeToRolls(skip)
         self._skip = self._skip + (skipFrames * self._frameSize)
         self._limit = self._rolls * self._frameSize
         self._limit = self._skip + self._limit
@@ -338,11 +342,18 @@ class Signal:
 
 def execCalc(event):
 
-    signal1 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
+    skipTime = 1
+    rangeTime = 1
+
+    if((isInputTime.GetValue() == 0) and (isInputPoint.GetValue() == 1)):
+        rangeTime = 0
+    if((isSkipTime.GetValue() == 0) and (isSkipPoint.GetValue() == 1)):
+        skipTime = 0
+    signal1 = Signal(inputRange.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue(), rangeTime, skipTime)
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
     if(inputFile2.GetValue() != ''):
-        signal2 = Signal(inputTime.GetValue(), inputFrame.GetValue(), inputSkipFramesTime.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue())
+        signal2 = Signal(inputRange.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue(), rangeTime, skipTime)
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signalDiff = copy.deepcopy(signal1)
         signalDiff.substractFrom(signal2)
@@ -358,15 +369,21 @@ def execCalc(event):
     plt.show()
 
 
-appTitle = 'Guoliu Gedimai v0.7.2'
+appTitle = 'Guoliu Gedimai v0.7.4'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(320, 360)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 360)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
 button = wx.Button(frame, label="Vykdyti", pos=(170, 270))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(180, 90), size=(110, 20), value=(''))
-inputTime = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('5'))
-inputSkipFramesTime = wx.TextCtrl(frame,-1,pos=(180, 150), size=(50, 20), value=('25'))
+inputRange = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('5'))
+isInputTime = wx.RadioButton(frame,label = 'sekundes',pos=(240, 120), style=wx.RB_GROUP)
+isInputPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(340, 120))
+isInputTime.SetValue(1)
+inputSkip = wx.TextCtrl(frame,-1,pos=(180, 150), size=(50, 20), value=('25'))
+isSkipTime = wx.RadioButton(frame,label = 'sekundes',pos=(240, 150), style=wx.RB_GROUP)
+isSkipPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(340, 150))
+isSkipTime.SetValue(1)
 inputFrame = wx.TextCtrl(frame,-1,pos=(180, 180), size=(50, 20), value=('1024'))
 inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('20'))
 inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
@@ -378,8 +395,8 @@ label0.SetForegroundColour(wx.Colour(14,181,56));
 frame.SetBackgroundColour(wx.Colour(225,225,225));
 label1 = wx.StaticText(frame, -1, 'Pirmas matavimu failas' , pos=(15, 60))
 label1 = wx.StaticText(frame, -1, 'Antras matavimu failas' , pos=(15, 90))
-label9 = wx.StaticText(frame, -1, 'Imtis (sekundes)' , pos=(15, 120))
-label5 = wx.StaticText(frame, -1, 'Praleisti (sekundes)' , pos=(15, 150))
+label9 = wx.StaticText(frame, -1, 'Imtis' , pos=(15, 120))
+label5 = wx.StaticText(frame, -1, 'Praleisti' , pos=(15, 150))
 label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 180))
 label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 210))
 label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 240))
