@@ -41,8 +41,10 @@ class Signal:
         self._SingleRollTime = 0;
         self.isDrawLegend = 0
         self.rmsLocation = "statistics/RMS/"
+        self._hideFreq
 
-    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime):
+    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq):
+        self._hideFreq = int(hideFreq)
         self.initValues();
         self._SingleRollTime = int(singleRollTime)
         self._rolls = int(range)
@@ -245,6 +247,8 @@ class Signal:
             if(len(data) > 1):
                 plt.subplot(subplots)
             Lenght = float(len(data[iter]['values']))
+            for i in range(0,int((Lenght/25000)*int(self._hideFreq)),1):
+                data[iter]['values'][i]=0
             localFreMark = (Lenght / 25000) * self._freMark
             plt.bar(localFreMark, max(data[iter]['values']), width=0.8, edgecolor = '#CCCCCC')
             plt.plot(range(0, int(Lenght)), data[iter]['values'], displayParams)
@@ -349,11 +353,29 @@ def execCalc(event):
         rangeTime = 0
     if((isSkipTime.GetValue() == 0) and (isSkipPoint.GetValue() == 1)):
         skipTime = 0
-    signal1 = Signal(inputRange.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue(), rangeTime, skipTime)
+    signal1 = Signal(
+        inputRange.GetValue(),
+        inputFrame.GetValue(),
+        inputSkip.GetValue(),
+        inputFreMark.GetValue(),
+        inputSingleRollTime.GetValue(),
+        rangeTime,
+        skipTime,
+        inputHideFreq.GetValue()
+    )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
     if(inputFile2.GetValue() != ''):
-        signal2 = Signal(inputRange.GetValue(), inputFrame.GetValue(), inputSkip.GetValue(), inputFreMark.GetValue(), inputSingleRollTime.GetValue(), rangeTime, skipTime)
+        signal2 = Signal(
+            inputRange.GetValue(),
+            inputFrame.GetValue(),
+            inputSkip.GetValue(),
+            inputFreMark.GetValue(),
+            inputSingleRollTime.GetValue(),
+            rangeTime,
+            skipTime,
+            inputHideFreq.GetValue()
+        )
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signalDiff = copy.deepcopy(signal1)
         signalDiff.substractFrom(signal2)
@@ -369,11 +391,11 @@ def execCalc(event):
     plt.show()
 
 
-appTitle = 'Guoliu Gedimai v0.7.4'
+appTitle = 'Guoliu Gedimai v0.7.5'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 360)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 400)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 270))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 300))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(180, 90), size=(110, 20), value=(''))
 inputRange = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('5'))
@@ -387,6 +409,7 @@ isSkipTime.SetValue(1)
 inputFrame = wx.TextCtrl(frame,-1,pos=(180, 180), size=(50, 20), value=('1024'))
 inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('20'))
 inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
+inputHideFreq = wx.TextCtrl(frame,-1,pos=(180, 270), size=(50, 20), value=('0'))
 
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
 font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
@@ -400,8 +423,9 @@ label5 = wx.StaticText(frame, -1, 'Praleisti' , pos=(15, 150))
 label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 180))
 label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 210))
 label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 240))
-label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 270))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 300))
+label2 = wx.StaticText(frame, -1,'Slept pirmus daznius (Hz)', pos=(15, 270))
+label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 300))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 330))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
