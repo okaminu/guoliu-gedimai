@@ -43,6 +43,16 @@ class Signal:
         self.rmsLocation = "statistics/RMS/"
         self._hideFreq
 
+        self._originalDataCorr = []
+        self._cleanDataCorr = []
+        self._meanFrameCorr = []
+        self._cleanTimeFrameCorr = []
+        self._originalDataFreqCorr = []
+        self._cleanDataFreqCorr = []
+        self._meanFrameFreqCorr = []
+        self._cleanTimeFrameFreqCorr = []
+        self._cleanFreqFrameCorr = []
+
     def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq):
         self._hideFreq = int(hideFreq)
         self.initValues();
@@ -151,6 +161,16 @@ class Signal:
         self._cleanTimeFrameFreq = abs(np.fft.rfft(self._cleanTimeFrame))
 
         #JS pradzia
+    def _calcAutoCorrelation(self):
+        self._originalDataCorr = np.corrcoef(self._originalData, self._originalData)
+        self._cleanDataCorr = np.corrcoef(self._cleanData, self._cleanData)
+        self._meanFrameCorr = np.corrcoef(self._meanFrame, self._meanFrame)
+        self._cleanTimeFrameCorr = np.corrcoef(self._cleanTimeFrame, self._cleanTimeFrame)
+        self._originalDataFreqCorr = np.corrcoef(self._originalDataFreq, self._originalDataFreq)
+        self._cleanDataFreqCorr = np.corrcoef(self._cleanDataFreq, self._cleanDataFreq)
+        self._meanFrameFreqCorr = np.corrcoef(self._meanFrameFreq, self._meanFrameFreq)
+        self._cleanTimeFrameFreqCorr = np.corrcoef(self._cleanTimeFrameFreq, self._cleanTimeFrameFreq)
+        self._cleanFreqFrameCorr = np.corrcoef(self._cleanFreqFrame, self._cleanFreqFrame)
 
     def _rmsOriginal (self):
         sum = 0
@@ -260,6 +280,20 @@ class Signal:
         if(self.isDrawLegend == 1):
             self.drawLegend()
 
+    def _displayCorr(self, data, displayParams):
+        self._lastFigure+=1
+        plt.figure(self._lastFigure)
+        subplots = 211
+        for iter in range(len(data)):
+            if(len(data) > 1):
+                plt.subplot(subplots)
+            plt.plot(range(0, len(data[iter]['values'])), data[iter]['values'], displayParams)
+            plt.title(data[iter]['title'])
+            subplots+=1
+
+
+        if(self.isDrawLegend == 1):
+            self.drawLegend()
     def getDrawLegend(self):
         return self.isDrawLegend
 
@@ -297,6 +331,28 @@ class Signal:
 
         cleanFreqFrame2Display = {'values' : self._cleanFreqFrame, 'title' : 'Centruoto Signalo dazniu vidurkis'}
         self._displayFreq({0: cleanFreqFrame2Display}, displayParams)
+
+        #Koreliacijos
+
+        originalCorrDisplay = {'values' : self._originalDataCorr, 'title' : 'Originalus (Laikas) Koreliacija'}
+        cleanCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Laikas) Koreliacija'}
+        self._displayCorr({0:originalCorrDisplay, 1: cleanCorrDisplay}, displayParams)
+
+        meanCorrDisplay = {'values' : self._meanFrameCorr, 'title' : 'Originalo vidurkis (Laikas) Koreliacija'}
+        cleanFrameCorrDisplay = {'values' : self._cleanTimeFrameCorr, 'title' : 'Centruoto vidurkis (Laikas) Koreliacija'}
+        self._displayCorr({0:meanCorrDisplay, 1: cleanFrameCorrDisplay}, displayParams)
+
+        origFreqCorrDisplay = {'values' : self._originalDataFreqCorr, 'title' : 'Originalus (Daznis) Koreliacija'}
+        cleanFreqCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Daznis) Koreliacija'}
+        self._displayCorr({0:origFreqCorrDisplay, 1: cleanFreqCorrDisplay}, displayParams)
+
+        meanFreqFrameCorrDisplay = {'values' : self._meanFrameFreqCorr, 'title' : 'Originalo vidurkis (Daznis) Koreliacija'}
+        cleanFreqFrameCorrDisplay = {'values' : self._cleanTimeFrameFreqCorr, 'title' : 'Centruoto vidurkis (Daznis) Koreliacija'}
+        self._displayCorr({0:meanFreqFrameCorrDisplay, 1: cleanFreqFrameCorrDisplay}, displayParams)
+
+        cleanFreqFrame2CorrDisplay = {'values' : self._cleanFreqFrameCorr, 'title' : 'Centruoto Signalo dazniu vidurkis Koreliacija'}
+        self._displayCorr({0: cleanFreqFrame2CorrDisplay}, displayParams)
+
         self._lastFigure = 0
 
     def substractFrom(self, signal2):
@@ -336,13 +392,13 @@ class Signal:
         for iter10 in range(leng9):
             self._cleanFreqFrame[iter10] = abs(self._cleanFreqFrame[iter10] - signal2._cleanFreqFrame[iter10])
 
-
     def processSignalFromFile(self, location):
         self._loadOriginal_File(location)
         self._calcMeanFrame()
         self._cleanSignal()
         self._stackCleanSignalFrames_Time_Freq()
         self._calcFreqSpectrums()
+        self._calcAutoCorrelation()
 
 def execCalc(event):
 
@@ -391,7 +447,7 @@ def execCalc(event):
     plt.show()
 
 
-appTitle = 'Guoliu Gedimai v0.7.5'
+appTitle = 'Guoliu Gedimai v0.7.6'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 400)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
