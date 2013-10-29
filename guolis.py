@@ -42,6 +42,7 @@ class Signal:
         self.isDrawLegend = 0
         self.rmsLocation = "statistics/RMS/"
         self._hideFreq
+        self.corrMode = 'full'
 
         self._originalDataCorr = []
         self._cleanDataCorr = []
@@ -161,16 +162,16 @@ class Signal:
         self._cleanTimeFrameFreq = abs(np.fft.rfft(self._cleanTimeFrame))
 
         #JS pradzia
-    def _calcAutoCorrelation(self):
-        self._originalDataCorr = np.corrcoef(self._originalData, self._originalData)
-        self._cleanDataCorr = np.corrcoef(self._cleanData, self._cleanData)
-        self._meanFrameCorr = np.corrcoef(self._meanFrame, self._meanFrame)
-        self._cleanTimeFrameCorr = np.corrcoef(self._cleanTimeFrame, self._cleanTimeFrame)
-        self._originalDataFreqCorr = np.corrcoef(self._originalDataFreq, self._originalDataFreq)
-        self._cleanDataFreqCorr = np.corrcoef(self._cleanDataFreq, self._cleanDataFreq)
-        self._meanFrameFreqCorr = np.corrcoef(self._meanFrameFreq, self._meanFrameFreq)
-        self._cleanTimeFrameFreqCorr = np.corrcoef(self._cleanTimeFrameFreq, self._cleanTimeFrameFreq)
-        self._cleanFreqFrameCorr = np.corrcoef(self._cleanFreqFrame, self._cleanFreqFrame)
+    def calcCorrelation(self, signal):
+        self._originalDataCorr = np.correlate(self._originalData, signal._originalData, mode=self.corrMode)
+        self._cleanDataCorr = np.correlate(self._cleanData, signal._cleanData, mode=self.corrMode)
+        self._meanFrameCorr = np.correlate(self._meanFrame, signal._meanFrame, mode=self.corrMode)
+        self._cleanTimeFrameCorr = np.correlate(self._cleanTimeFrame, signal._cleanTimeFrame, mode=self.corrMode)
+        self._originalDataFreqCorr = np.correlate(self._originalDataFreq, signal._originalDataFreq, mode=self.corrMode)
+        self._cleanDataFreqCorr = np.correlate(self._cleanDataFreq, signal._cleanDataFreq, mode=self.corrMode)
+        self._meanFrameFreqCorr = np.correlate(self._meanFrameFreq, signal._meanFrameFreq, mode=self.corrMode)
+        self._cleanTimeFrameFreqCorr = np.correlate(self._cleanTimeFrameFreq, signal._cleanTimeFrameFreq, mode=self.corrMode)
+        self._cleanFreqFrameCorr = np.correlate(self._cleanFreqFrame, signal._cleanFreqFrame, mode=self.corrMode)
 
     def _rmsOriginal (self):
         sum = 0
@@ -308,7 +309,7 @@ class Signal:
         self.signalNames.append(signalName)
         self.signalData.append(plt.Rectangle([0,0],1,1, fc = color))
 
-    def displayAllData(self, color, signalName):
+    def displayAllData(self, color, signalName, isCorr = 0):
         self._saveRMS(signalName)
 
         displayParams = color;
@@ -332,26 +333,25 @@ class Signal:
         cleanFreqFrame2Display = {'values' : self._cleanFreqFrame, 'title' : 'Centruoto Signalo dazniu vidurkis'}
         self._displayFreq({0: cleanFreqFrame2Display}, displayParams)
 
-        #Koreliacijos
+        if(isCorr == 1):
+            originalCorrDisplay = {'values' : self._originalDataCorr, 'title' : 'Originalus (Laikas) Koreliacija'}
+            cleanCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Laikas) Koreliacija'}
+            self._displayCorr({0:originalCorrDisplay, 1: cleanCorrDisplay}, displayParams)
 
-        originalCorrDisplay = {'values' : self._originalDataCorr, 'title' : 'Originalus (Laikas) Koreliacija'}
-        cleanCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Laikas) Koreliacija'}
-        self._displayCorr({0:originalCorrDisplay, 1: cleanCorrDisplay}, displayParams)
+            meanCorrDisplay = {'values' : self._meanFrameCorr, 'title' : 'Originalo vidurkis (Laikas) Koreliacija'}
+            cleanFrameCorrDisplay = {'values' : self._cleanTimeFrameCorr, 'title' : 'Centruoto vidurkis (Laikas) Koreliacija'}
+            self._displayCorr({0:meanCorrDisplay, 1: cleanFrameCorrDisplay}, displayParams)
 
-        meanCorrDisplay = {'values' : self._meanFrameCorr, 'title' : 'Originalo vidurkis (Laikas) Koreliacija'}
-        cleanFrameCorrDisplay = {'values' : self._cleanTimeFrameCorr, 'title' : 'Centruoto vidurkis (Laikas) Koreliacija'}
-        self._displayCorr({0:meanCorrDisplay, 1: cleanFrameCorrDisplay}, displayParams)
+            origFreqCorrDisplay = {'values' : self._originalDataFreqCorr, 'title' : 'Originalus (Daznis) Koreliacija'}
+            cleanFreqCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Daznis) Koreliacija'}
+            self._displayCorr({0:origFreqCorrDisplay, 1: cleanFreqCorrDisplay}, displayParams)
 
-        origFreqCorrDisplay = {'values' : self._originalDataFreqCorr, 'title' : 'Originalus (Daznis) Koreliacija'}
-        cleanFreqCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Daznis) Koreliacija'}
-        self._displayCorr({0:origFreqCorrDisplay, 1: cleanFreqCorrDisplay}, displayParams)
+            meanFreqFrameCorrDisplay = {'values' : self._meanFrameFreqCorr, 'title' : 'Originalo vidurkis (Daznis) Koreliacija'}
+            cleanFreqFrameCorrDisplay = {'values' : self._cleanTimeFrameFreqCorr, 'title' : 'Centruoto vidurkis (Daznis) Koreliacija'}
+            self._displayCorr({0:meanFreqFrameCorrDisplay, 1: cleanFreqFrameCorrDisplay}, displayParams)
 
-        meanFreqFrameCorrDisplay = {'values' : self._meanFrameFreqCorr, 'title' : 'Originalo vidurkis (Daznis) Koreliacija'}
-        cleanFreqFrameCorrDisplay = {'values' : self._cleanTimeFrameFreqCorr, 'title' : 'Centruoto vidurkis (Daznis) Koreliacija'}
-        self._displayCorr({0:meanFreqFrameCorrDisplay, 1: cleanFreqFrameCorrDisplay}, displayParams)
-
-        cleanFreqFrame2CorrDisplay = {'values' : self._cleanFreqFrameCorr, 'title' : 'Centruoto Signalo dazniu vidurkis Koreliacija'}
-        self._displayCorr({0: cleanFreqFrame2CorrDisplay}, displayParams)
+            cleanFreqFrame2CorrDisplay = {'values' : self._cleanFreqFrameCorr, 'title' : 'Centruoto Signalo dazniu vidurkis Koreliacija'}
+            self._displayCorr({0: cleanFreqFrame2CorrDisplay}, displayParams)
 
         self._lastFigure = 0
 
@@ -398,7 +398,6 @@ class Signal:
         self._cleanSignal()
         self._stackCleanSignalFrames_Time_Freq()
         self._calcFreqSpectrums()
-        self._calcAutoCorrelation()
 
 def execCalc(event):
 
@@ -421,6 +420,8 @@ def execCalc(event):
     )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
+
+    corrSignal = signal1
     if(inputFile2.GetValue() != ''):
         signal2 = Signal(
             inputRange.GetValue(),
@@ -437,11 +438,13 @@ def execCalc(event):
         signalDiff.substractFrom(signal2)
         signalDiff.displayAllData('r', 'Skirtumas')
         signal2.displayAllData('b', 'Antras')
+        corrSignal = signal2
         del signalDiff
         del signal2
 
+    signal1.calcCorrelation(corrSignal)
     signal1.setDrawLegend(1)
-    signal1.displayAllData('g', 'Pirmas')
+    signal1.displayAllData('g', 'Pirmas', 1)
     del signal1
     # Draw the plot to the screen
     plt.show()
@@ -454,7 +457,7 @@ frame.Show(True)     # Show the frame.
 button = wx.Button(frame, label="Vykdyti", pos=(170, 300))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(180, 90), size=(110, 20), value=(''))
-inputRange = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('5'))
+inputRange = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('1'))
 isInputTime = wx.RadioButton(frame,label = 'sekundes',pos=(240, 120), style=wx.RB_GROUP)
 isInputPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(340, 120))
 isInputTime.SetValue(1)
