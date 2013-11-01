@@ -329,13 +329,7 @@ class Signal:
         self.signalNames.append(signalName)
         self.signalData.append(plt.Rectangle([0,0],1,1, fc = color))
 
-    def displayAllData(self, color, signalName, isCorr = 0):
-        self._saveRMS(signalName)
-
-        displayParams = color;
-
-        #Time
-        self.addToLegend(signalName, color)
+    def displayAllTime(self, displayParams):
         originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'}
         cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'}
         self._displayTime({0:originalDisplay, 1: cleanDisplay}, displayParams, 's')
@@ -344,7 +338,9 @@ class Signal:
         cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Centruoto vidurkis (Laikas)'}
         self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, displayParams,'ms')
 
-        #Frequencies
+
+    def displayAllFreq(self, displayParams):
+
         origFreqDisplay = {'values' : self._originalDataFreq, 'title' : 'Originalus (Daznis)'}
         cleanFreqDisplay = {'values' : self._cleanDataFreq, 'title' : 'Centruotas (Daznis)'}
         self._displayFreq({0:origFreqDisplay, 1: cleanFreqDisplay}, displayParams)
@@ -356,7 +352,7 @@ class Signal:
         cleanFreqFrame2Display = {'values' : self._cleanFreqFrame, 'title' : 'Centruoto Signalo dazniu vidurkis'}
         self._displayFreq({0: cleanFreqFrame2Display}, displayParams)
 
-        #Cepstrums
+    def displayAllCepstrums(self, displayParams):
         originalCepstDisplay = {'values' : self._originalDataCeps, 'title' : 'Originalus (Laikas) Kepstras'}
         cleanCepstDisplay = {'values' : self._cleanDataCeps, 'title' : 'Centruotas (Laikas) Kepstras'}
         self._displayTime({0:originalCepstDisplay, 1: cleanCepstDisplay}, displayParams, 's')
@@ -365,26 +361,39 @@ class Signal:
         cleanFrameCepstDisplay = {'values' : self._cleanTimeFrameCeps, 'title' : 'Centruoto vidurkis (Laikas) Kepstras'}
         self._displayTime({0:meanCepstDisplay, 1: cleanFrameCepstDisplay}, displayParams,'ms')
 
-        #Correlations
+    def displayAllCorrelations(self, displayParams):
+        originalCorrDisplay = {'values' : self._originalDataCorr, 'title' : 'Originalus (Laikas) Koreliacija'}
+        cleanCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Laikas) Koreliacija'}
+        self._displayCorr({0:originalCorrDisplay, 1: cleanCorrDisplay}, displayParams)
+
+        meanCorrDisplay = {'values' : self._meanFrameCorr, 'title' : 'Originalo vidurkis (Laikas) Koreliacija'}
+        cleanFrameCorrDisplay = {'values' : self._cleanTimeFrameCorr, 'title' : 'Centruoto vidurkis (Laikas) Koreliacija'}
+        self._displayCorr({0:meanCorrDisplay, 1: cleanFrameCorrDisplay}, displayParams)
+
+        origFreqCorrDisplay = {'values' : self._originalDataFreqCorr, 'title' : 'Originalus (Daznis) Koreliacija'}
+        cleanFreqCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Daznis) Koreliacija'}
+        self._displayCorr({0:origFreqCorrDisplay, 1: cleanFreqCorrDisplay}, displayParams)
+
+        meanFreqFrameCorrDisplay = {'values' : self._meanFrameFreqCorr, 'title' : 'Originalo vidurkis (Daznis) Koreliacija'}
+        cleanFreqFrameCorrDisplay = {'values' : self._cleanTimeFrameFreqCorr, 'title' : 'Centruoto vidurkis (Daznis) Koreliacija'}
+        self._displayCorr({0:meanFreqFrameCorrDisplay, 1: cleanFreqFrameCorrDisplay}, displayParams)
+
+        cleanFreqFrame2CorrDisplay = {'values' : self._cleanFreqFrameCorr, 'title' : 'Centruoto Signalo dazniu vidurkis Koreliacija'}
+        self._displayCorr({0: cleanFreqFrame2CorrDisplay}, displayParams)
+
+    def displayAllData(self, color, signalName, isCorr = 0):
+        self._saveRMS(signalName)
+
+        displayParams = color;
+
+        self.displayAllTime(displayParams)
+
+        self.displayAllFreq(displayParams)
+
+        self.displayAllCepstrums(displayParams)
+
         if(isCorr == 1):
-            originalCorrDisplay = {'values' : self._originalDataCorr, 'title' : 'Originalus (Laikas) Koreliacija'}
-            cleanCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Laikas) Koreliacija'}
-            self._displayCorr({0:originalCorrDisplay, 1: cleanCorrDisplay}, displayParams)
-
-            meanCorrDisplay = {'values' : self._meanFrameCorr, 'title' : 'Originalo vidurkis (Laikas) Koreliacija'}
-            cleanFrameCorrDisplay = {'values' : self._cleanTimeFrameCorr, 'title' : 'Centruoto vidurkis (Laikas) Koreliacija'}
-            self._displayCorr({0:meanCorrDisplay, 1: cleanFrameCorrDisplay}, displayParams)
-
-            origFreqCorrDisplay = {'values' : self._originalDataFreqCorr, 'title' : 'Originalus (Daznis) Koreliacija'}
-            cleanFreqCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Daznis) Koreliacija'}
-            self._displayCorr({0:origFreqCorrDisplay, 1: cleanFreqCorrDisplay}, displayParams)
-
-            meanFreqFrameCorrDisplay = {'values' : self._meanFrameFreqCorr, 'title' : 'Originalo vidurkis (Daznis) Koreliacija'}
-            cleanFreqFrameCorrDisplay = {'values' : self._cleanTimeFrameFreqCorr, 'title' : 'Centruoto vidurkis (Daznis) Koreliacija'}
-            self._displayCorr({0:meanFreqFrameCorrDisplay, 1: cleanFreqFrameCorrDisplay}, displayParams)
-
-            cleanFreqFrame2CorrDisplay = {'values' : self._cleanFreqFrameCorr, 'title' : 'Centruoto Signalo dazniu vidurkis Koreliacija'}
-            self._displayCorr({0: cleanFreqFrame2CorrDisplay}, displayParams)
+            self.displayAllCorrelations(displayParams)
 
         self._lastFigure = 0
 
@@ -486,7 +495,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai v0.7.7'
+appTitle = 'Guoliu Gedimai v0.7.8'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 400)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
