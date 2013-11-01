@@ -53,6 +53,10 @@ class Signal:
         self._meanFrameFreqCorr = []
         self._cleanTimeFrameFreqCorr = []
         self._cleanFreqFrameCorr = []
+        self._originalDataCeps = []
+        self._cleanDataCeps = []
+        self._meanFrameCeps = []
+        self._cleanTimeFrameCeps = []
 
     def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq):
         self._hideFreq = int(hideFreq)
@@ -173,6 +177,22 @@ class Signal:
         self._cleanTimeFrameFreqCorr = np.correlate(self._cleanTimeFrameFreq, signal._cleanTimeFrameFreq, mode=self.corrMode)
         self._cleanFreqFrameCorr = np.correlate(self._cleanFreqFrame, signal._cleanFreqFrame, mode=self.corrMode)
 
+    def _calcCepstrums(self):
+        self._originalDataCeps = self.cepstrum(self._originalData)
+        self._cleanDataCeps = self.cepstrum(self._cleanData)
+        self._meanFrameCeps = self.cepstrum(self._meanFrame)
+        self._cleanTimeFrameCeps = self.cepstrum(self._cleanTimeFrame)
+
+
+    def cepstrum(self, signal):
+        temp = abs(np.fft.rfft(signal))
+        for index, item in enumerate(temp):
+            if(temp[index] == 0):
+                temp[index] = 0.00001
+
+        cepstrum = abs(np.fft.irfft(np.log(temp)))
+        return cepstrum
+
     def _rmsOriginal (self):
         sum = 0
         originalData = self._originalData
@@ -246,7 +266,7 @@ class Signal:
             for marker in range(len(xAxisMarkerPlacement)):
                 rolls = self.convertPointsToRolls(xAxisMarkerPlacement[marker])
                 if(marking == 's'):
-                    time = int(math.ceil(self.convertRollsToTime(rolls)))
+                    time = float(self.convertRollsToTime(rolls))
                 elif(marking == 'ms'):
                     time = self.convertRollsToTime(rolls)
                 xAxisMarkerValues.append(time)
@@ -313,6 +333,8 @@ class Signal:
         self._saveRMS(signalName)
 
         displayParams = color;
+
+        #Time
         self.addToLegend(signalName, color)
         originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'}
         cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'}
@@ -322,6 +344,7 @@ class Signal:
         cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Centruoto vidurkis (Laikas)'}
         self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, displayParams,'ms')
 
+        #Frequencies
         origFreqDisplay = {'values' : self._originalDataFreq, 'title' : 'Originalus (Daznis)'}
         cleanFreqDisplay = {'values' : self._cleanDataFreq, 'title' : 'Centruotas (Daznis)'}
         self._displayFreq({0:origFreqDisplay, 1: cleanFreqDisplay}, displayParams)
@@ -333,6 +356,16 @@ class Signal:
         cleanFreqFrame2Display = {'values' : self._cleanFreqFrame, 'title' : 'Centruoto Signalo dazniu vidurkis'}
         self._displayFreq({0: cleanFreqFrame2Display}, displayParams)
 
+        #Cepstrums
+        originalCepstDisplay = {'values' : self._originalDataCeps, 'title' : 'Originalus (Laikas) Kepstras'}
+        cleanCepstDisplay = {'values' : self._cleanDataCeps, 'title' : 'Centruotas (Laikas) Kepstras'}
+        self._displayTime({0:originalCepstDisplay, 1: cleanCepstDisplay}, displayParams, 's')
+
+        meanCepstDisplay = {'values' : self._meanFrameCeps, 'title' : 'Originalo vidurkis (Laikas) Kepstras'}
+        cleanFrameCepstDisplay = {'values' : self._cleanTimeFrameCeps, 'title' : 'Centruoto vidurkis (Laikas) Kepstras'}
+        self._displayTime({0:meanCepstDisplay, 1: cleanFrameCepstDisplay}, displayParams,'ms')
+
+        #Correlations
         if(isCorr == 1):
             originalCorrDisplay = {'values' : self._originalDataCorr, 'title' : 'Originalus (Laikas) Koreliacija'}
             cleanCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Laikas) Koreliacija'}
@@ -398,6 +431,7 @@ class Signal:
         self._cleanSignal()
         self._stackCleanSignalFrames_Time_Freq()
         self._calcFreqSpectrums()
+        self._calcCepstrums()
 
 def execCalc(event):
 
@@ -450,7 +484,9 @@ def execCalc(event):
     plt.show()
 
 
-appTitle = 'Guoliu Gedimai v0.7.6'
+
+
+appTitle = 'Guoliu Gedimai v0.7.7'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 400)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
