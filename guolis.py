@@ -28,6 +28,7 @@ class Signal:
         self._skip = 0
         self._limit = 0
         self._freMark = 0.0
+        self._proportion = 9.81
         self._displayParams = 'g'
         self._originalData = []
         self._originalDataFreq = []
@@ -102,6 +103,10 @@ class Signal:
             if re.match("BEGIN_DATA", line):
                 dataBegin = 1
         wx.CallAfter(dialog.Destroy)
+
+    def _alterTimeSignal(self):
+        for single in range(len(self._originalData)):
+            self._originalData[single] = self._originalData[single] * self._proportion
 
     def _calcMeanFrame(self):
 
@@ -436,6 +441,7 @@ class Signal:
 
     def processSignalFromFile(self, location):
         self._loadOriginal_File(location)
+        self._alterTimeSignal()
         self._calcMeanFrame()
         self._cleanSignal()
         self._stackCleanSignalFrames_Time_Freq()
