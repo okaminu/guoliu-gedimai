@@ -271,9 +271,9 @@ class Signal:
             for marker in range(len(xAxisMarkerPlacement)):
                 rolls = self.convertPointsToRolls(xAxisMarkerPlacement[marker])
                 if(marking == 's'):
-                    time = float(self.convertRollsToTime(rolls))
+                    time = round(float(self.convertRollsToTime(rolls)), 2)
                 elif(marking == 'ms'):
-                    time = self.convertRollsToTime(rolls)
+                    time = round(self.convertRollsToTime(rolls),2)
                 xAxisMarkerValues.append(time)
 
 
