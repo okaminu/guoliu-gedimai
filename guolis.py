@@ -405,39 +405,39 @@ class Signal:
     def substractFrom(self, signal2):
         leng = min({len(signal2._originalData), len(self._originalData)})
         for iter1 in range(leng):
-            self._originalData[iter1] = abs(self._originalData[iter1] - signal2._originalData[iter1])
+            self._originalData[iter1] = self._originalData[iter1] - signal2._originalData[iter1]
 
         leng2 = min({len(signal2._cleanData), len(self._cleanData)})
         for iter2 in range(leng2):
-            self._cleanData[iter2] = abs(self._cleanData[iter2] - signal2._cleanData[iter2])
+            self._cleanData[iter2] = self._cleanData[iter2] - signal2._cleanData[iter2]
 
         leng3 = min({len(signal2._meanFrame), len(self._meanFrame)})
         for iter4 in range(leng3):
-            self._meanFrame[iter4] = abs(self._meanFrame[iter4] - signal2._meanFrame[iter4])
+            self._meanFrame[iter4] = self._meanFrame[iter4] - signal2._meanFrame[iter4]
 
         leng4 = min({len(signal2._cleanTimeFrame), len(self._cleanTimeFrame)})
         for iter5 in range(leng4):
-            self._cleanTimeFrame[iter5] = abs(self._cleanTimeFrame[iter5] - signal2._cleanTimeFrame[iter5])
+            self._cleanTimeFrame[iter5] = self._cleanTimeFrame[iter5] - signal2._cleanTimeFrame[iter5]
 
         leng5 = min({len(signal2._originalDataFreq), len(self._originalDataFreq)})
         for iter6 in range(leng5):
-            self._originalDataFreq[iter6] = abs(self._originalDataFreq[iter6] - signal2._originalDataFreq[iter6])
+            self._originalDataFreq[iter6] = self._originalDataFreq[iter6] - signal2._originalDataFreq[iter6]
 
         leng6 = min({len(signal2._cleanDataFreq), len(self._cleanDataFreq)})
         for iter7 in range(leng6):
-            self._cleanDataFreq[iter7] = abs(self._cleanDataFreq[iter7] - signal2._cleanDataFreq[iter7])
+            self._cleanDataFreq[iter7] = self._cleanDataFreq[iter7] - signal2._cleanDataFreq[iter7]
 
         leng7 = min({len(signal2._meanFrameFreq), len(self._meanFrameFreq)})
         for iter8 in range(leng7):
-            self._meanFrameFreq[iter8] = abs(self._meanFrameFreq[iter8] - signal2._meanFrameFreq[iter8])
+            self._meanFrameFreq[iter8] = self._meanFrameFreq[iter8] - signal2._meanFrameFreq[iter8]
 
         leng8 = min({len(signal2._cleanTimeFrame), len(self._cleanTimeFrameFreq)})
         for iter9 in range(leng8):
-            self._cleanTimeFrameFreq[iter9] = abs(self._cleanTimeFrameFreq[iter9] - signal2._cleanTimeFrameFreq[iter9])
+            self._cleanTimeFrameFreq[iter9] = self._cleanTimeFrameFreq[iter9] - signal2._cleanTimeFrameFreq[iter9]
 
         leng9 = min({len(signal2._cleanFreqFrame), len(self._cleanFreqFrame)})
         for iter10 in range(leng9):
-            self._cleanFreqFrame[iter10] = abs(self._cleanFreqFrame[iter10] - signal2._cleanFreqFrame[iter10])
+            self._cleanFreqFrame[iter10] = self._cleanFreqFrame[iter10] - signal2._cleanFreqFrame[iter10]
 
     def processSignalFromFile(self, location):
         self._loadOriginal_File(location)
@@ -491,9 +491,9 @@ def execCalc(event):
         del signalDiff
         del signal2
 
-    signal1.calcCorrelation(corrSignal)
+    #signal1.calcCorrelation(corrSignal)
     signal1.setDrawLegend(1)
-    signal1.displayAllData('g', 'Pirmas', 1)
+    signal1.displayAllData('g', 'Pirmas')
     del signal1
     # Draw the plot to the screen
     plt.show()
