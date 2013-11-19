@@ -42,6 +42,9 @@ class Signal:
         self._SingleRollTime = 0;
         self.isDrawLegend = 0
         self.rmsLocation = "statistics/RMS/"
+        self.statisticsLocation = "statistics/"
+        self.distanceLocation = "statistics/distance/"
+        self.distanceTreshold = 100 #atstumas po kurio vel prades ieskoti kitos minimalios reiksmes
         self._hideFreq
         self.corrMode = 'full'
 
@@ -253,6 +256,55 @@ class Signal:
         file.writelines("Centruotas: "+ self._rmsCleaned() +"\n")
         file.writelines("Originalo vidurkintas: "+ self._rmsMean +"\n")
         file.writelines("Centruoto vidurkintas: "+ self._rmsCleanedSF() +"\n")
+
+    def saveMaxFrequencyDistance(self, signalName):
+        self.saveSignalMaxDistance('Originalus (Daznis)', self._originalDataFreq)
+        self.saveSignalMaxDistance('Centruotas (Laikas)', self._cleanDataFreq)
+        self.saveSignalMaxDistance('Originalo vidurkis (Daznis)', self._meanFrameFreq)
+        self.saveSignalMaxDistance('Centruoto vidurkis (Daznis)', self._cleanTimeFrameFreq)
+        self.saveSignalMaxDistance('Centruoto Signalo dazniu vidurkis', self._cleanFreqFrame)
+
+    def saveSignalMaxDistance(self, signalName, signalData):
+        originalFreqMax = self.twoMax(signalData)
+        data = ['--- '+ signalName +' ---',
+                'Didziausia: '+str(originalFreqMax['first']),
+                'Antra didziausia:'+str(originalFreqMax['second']),
+                'Pirmas Indeksas:'+str(originalFreqMax['firstIndex']),
+                'Antras Indeksas:'+str(originalFreqMax['secondIndex']),
+                'Atstumas:'+ str(abs(originalFreqMax['firstIndex'] - originalFreqMax['secondIndex']))]
+        self._saveData(self.distanceLocation, signalName, {'values':data})
+
+
+    def twoMax(self, numbers):
+        m1, m2 = None, None
+        m1Index, m2Index, count = 0, 0, 0
+        skipCount = self.distanceTreshold
+        skip = skipCount
+        for val in numbers:
+            if skip > skipCount:
+                if val > m1:
+                    m2 = m1
+                    m1 = val
+                    m2Index = m1Index
+                    m1Index = count
+                    skip = 0
+                elif val > m2:
+                    m2 = val
+                    m2Index = count
+            else:
+                skip += 1
+            count += 1
+
+        return {'first': m1, 'second': m2, 'firstIndex': m1Index, 'secondIndex': m2Index}
+
+    def _saveData(self, directory, fileName, data):
+
+        if(os.path.exists(directory) == 0):
+            os.makedirs(directory)
+
+        file = open(directory+fileName+".txt", 'w')
+        for iter in range(len(data['values'])):
+            file.writelines(str(data['values'][iter]) +"\n")
 
     def _displayTime(self, data, displayParams, marking = 's'):
         self._lastFigure+=1
@@ -487,6 +539,7 @@ def execCalc(event):
         signalDiff.substractFrom(signal2)
         signalDiff.displayAllData('r', 'Skirtumas')
         signal2.displayAllData('b', 'Antras')
+        signal2.saveMaxFrequencyDistance('Antras');
         corrSignal = signal2
         del signalDiff
         del signal2
@@ -494,6 +547,7 @@ def execCalc(event):
     #signal1.calcCorrelation(corrSignal)
     signal1.setDrawLegend(1)
     signal1.displayAllData('g', 'Pirmas')
+    signal1.saveMaxFrequencyDistance('Pirmas');
     del signal1
     # Draw the plot to the screen
     plt.show()
