@@ -184,12 +184,16 @@ class Signal:
         self._meanFrameFreq = abs(np.fft.rfft(self._meanFrame))
         self._cleanTimeFrameFreq = abs(np.fft.rfft(self._cleanTimeFrame))
 
+        #frame freq calc
+        #sigSlice = self._cleanTimeFrameFreq[400:512]
+        #
+        #
+        #filterSlice = self.filterHanningWindow(sigSlice)
+        #
+        #
+        #self._cleanTimeFrameFreq = np.concatenate((self._cleanTimeFrameFreq[:400], filterSlice))
         #freq calc
-
-        self._cleanTimeFrameFreq = self.filterHanningWindow(self._cleanTimeFrameFreq)
-
-        #freq calc
-        self._cleanTimeFrameFreq = self.filterHanningWindow(self._cleanTimeFrameFreq)
+        #self._cleanTimeFrameFreq = self.filterHanningWindow(self._cleanTimeFrameFreq)
 
         #time calc
         #self._cleanTimeFrameFreq = abs(np.fft.rfft(self.filterHanningWindow(self._cleanTimeFrame)))
