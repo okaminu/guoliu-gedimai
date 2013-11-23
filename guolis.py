@@ -163,12 +163,16 @@ class Signal:
         self._cleanTimeFrame = cleanTimeFrame
         self._cleanFreqFrame = cleanFreqFrame
 
-    def customHanning(self, count):
+    def calculateHanningWindow(self, count):
         result= []
         for i in range(0, count, 1):
                 result.append(0.5 * (1- np.cos(((2*3.14)*i)/count)))
         return np.array(result)
 
+    def filterHanningWindow(self, signal):
+        han = self.calculateHanningWindow(len(signal))
+        filtered = signal*han
+        return filtered
 
     def _calcFreqSpectrums(self):
 
@@ -181,13 +185,14 @@ class Signal:
         self._cleanTimeFrameFreq = abs(np.fft.rfft(self._cleanTimeFrame))
 
         #freq calc
-        #han = self.customHanning(len(self._cleanTimeFrameFreq))
-        #self._cleanTimeFrameFreq = self._cleanTimeFrameFreq*han
 
+        self._cleanTimeFrameFreq = self.filterHanningWindow(self._cleanTimeFrameFreq)
+
+        #freq calc
+        self._cleanTimeFrameFreq = self.filterHanningWindow(self._cleanTimeFrameFreq)
 
         #time calc
-        #han = self.customHanning(len(self._cleanTimeFrame))
-        #self._cleanTimeFrameFreq = np.fft.rfft(self._cleanTimeFrame*han)
+        #self._cleanTimeFrameFreq = abs(np.fft.rfft(self.filterHanningWindow(self._cleanTimeFrame)))
 
 
         #JS pradzia
