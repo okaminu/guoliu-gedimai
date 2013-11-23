@@ -163,6 +163,13 @@ class Signal:
         self._cleanTimeFrame = cleanTimeFrame
         self._cleanFreqFrame = cleanFreqFrame
 
+    def customHanning(self, count):
+        result= []
+        for i in range(0, count, 1):
+                result.append(0.5 * (1- np.cos(((2*3.14)*i)/count)))
+        return np.array(result)
+
+
     def _calcFreqSpectrums(self):
 
         self._originalDataFreq = abs(np.fft.rfft(self._originalData)) / 555.555555
@@ -172,6 +179,16 @@ class Signal:
         self._cleanDataFreq = abs(np.fft.rfft(self._cleanData)) / 555.555555
         self._meanFrameFreq = abs(np.fft.rfft(self._meanFrame))
         self._cleanTimeFrameFreq = abs(np.fft.rfft(self._cleanTimeFrame))
+
+        #freq calc
+        #han = self.customHanning(len(self._cleanTimeFrameFreq))
+        #self._cleanTimeFrameFreq = self._cleanTimeFrameFreq*han
+
+
+        #time calc
+        #han = self.customHanning(len(self._cleanTimeFrame))
+        #self._cleanTimeFrameFreq = np.fft.rfft(self._cleanTimeFrame*han)
+
 
         #JS pradzia
     def calcCorrelation(self, signal):
@@ -551,7 +568,6 @@ def execCalc(event):
     del signal1
     # Draw the plot to the screen
     plt.show()
-
 
 
 
