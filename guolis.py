@@ -174,6 +174,21 @@ class Signal:
         filtered = signal*han
         return filtered
 
+    def test(self, signal, size):
+        final = []
+        for start in range(len(signal)):
+            final.append(0)
+            sigSlice = signal[start:start+size]
+            #
+            #
+            filterSlice = self.filterHanningWindow(sigSlice)
+
+            for i in range(len(filterSlice)):
+                final[start] = final[start] + filterSlice[i]
+            #
+            #
+        return final
+
     def _calcFreqSpectrums(self):
 
         self._originalDataFreq = abs(np.fft.rfft(self._originalData)) / 555.555555
@@ -184,6 +199,7 @@ class Signal:
         self._meanFrameFreq = abs(np.fft.rfft(self._meanFrame))
         self._cleanTimeFrameFreq = abs(np.fft.rfft(self._cleanTimeFrame))
 
+        #self._cleanTimeFrameFreq = self.test(self._cleanTimeFrameFreq, 50)
         #frame freq calc
         #sigSlice = self._cleanTimeFrameFreq[400:512]
         #
