@@ -357,6 +357,13 @@ class Signal:
 
             xAxisMarkerValues[len(xAxisMarkerValues) -1] = str(xAxisMarkerValues[len(xAxisMarkerValues) -1]) + " s"
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
+
+            Lenght = float(len(data[iter]['values']))
+            gridPart = (Lenght/8)
+            gridMark = [gridPart * 1, gridPart * 2, gridPart * 3, gridPart * 4, gridPart * 5, gridPart * 6, gridPart * 7, gridPart * 8]
+            for i in range(len(gridMark)):
+                height = abs(max(data[iter]['values'])) + abs(min(data[iter]['values']))
+                plt.bar(gridMark[i], height, width=1, edgecolor = '#000000', bottom= min(data[iter]['values']))
         if(self.isDrawLegend == 1):
                 self.drawLegend()
 
