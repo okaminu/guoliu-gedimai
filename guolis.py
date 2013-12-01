@@ -47,6 +47,8 @@ class Signal:
         self.distanceTreshold = 100 #atstumas po kurio vel prades ieskoti kitos minimalios reiksmes
         self._hideFreq
         self.corrMode = 'full'
+        self.freqSize = 25000
+        self._hanningWindowSize = 0
 
         self._originalDataCorr = []
         self._cleanDataCorr = []
@@ -62,9 +64,10 @@ class Signal:
         self._meanFrameCeps = []
         self._cleanTimeFrameCeps = []
 
-    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq):
+    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize):
         self._hideFreq = int(hideFreq)
         self.initValues();
+        self._hanningWindowSize = int(hannSize)
         self._SingleRollTime = int(singleRollTime)
         self._rolls = int(range)
         if(isRangeTime == 1):
@@ -178,24 +181,33 @@ class Signal:
                 result.append(0.5 * (1- np.cos(((2*3.14)*i)/count)))
         return np.array(result)
 
-    def filterHanningWindow(self, signal):
+    def filterHanningWindowFrame(self, signal):
         han = self.calculateHanningWindow(len(signal))
         filtered = signal*han
         return filtered
 
-    def test(self, signal, size):
+    def filterHanningWindow(self, signal, windowSize, totalSize):
+        size = int((len(signal) * windowSize) / totalSize)
+
         final = []
+
+        if(size <= 0):
+            return signal
+
         for start in range(len(signal)):
             final.append(0)
             sigSlice = signal[start:start+size]
             #
             #
-            filterSlice = self.filterHanningWindow(sigSlice)
+            filterSlice = self.filterHanningWindowFrame(sigSlice)
 
             for i in range(len(filterSlice)):
                 final[start] = final[start] + filterSlice[i]
             #
             #
+            final[start] = final[start] / len(filterSlice)
+
+
         return final
 
     def _calcFreqSpectrums(self):
@@ -208,23 +220,16 @@ class Signal:
         self._meanFrameFreq = abs(np.fft.rfft(self._meanFrame))
         self._cleanTimeFrameFreq = abs(np.fft.rfft(self._cleanTimeFrame))
 
-        #self._cleanTimeFrameFreq = self.test(self._cleanTimeFrameFreq, 50)
-        #frame freq calc
-        #sigSlice = self._cleanTimeFrameFreq[400:512]
-        #
-        #
-        #filterSlice = self.filterHanningWindow(sigSlice)
-        #
-        #
-        #self._cleanTimeFrameFreq = np.concatenate((self._cleanTimeFrameFreq[:400], filterSlice))
-        #freq calc
-        #self._cleanTimeFrameFreq = self.filterHanningWindow(self._cleanTimeFrameFreq)
 
-        #time calc
-        #self._cleanTimeFrameFreq = abs(np.fft.rfft(self.filterHanningWindow(self._cleanTimeFrame)))
+    def _calcHanningWindow(self):
+        #self._originalDataFreq = self.filterHanningWindow(self._originalDataFreq, self._hanningWindowSize, self.freqSize)
+        #self._cleanDataFreq = self.filterHanningWindow(self._cleanDataFreq, self._hanningWindowSize, self.freqSize)
+        self._meanFrameFreq = self.filterHanningWindow(self._meanFrameFreq, self._hanningWindowSize, self.freqSize)
+        self._cleanTimeFrameFreq = self.filterHanningWindow(self._cleanTimeFrameFreq, self._hanningWindowSize, self.freqSize)
+        self._cleanFreqFrame = self.filterHanningWindow(self._cleanFreqFrame, self._hanningWindowSize, self.freqSize)
+        return 0
 
 
-        #JS pradzia
     def calcCorrelation(self, signal):
         self._originalDataCorr = np.correlate(self._originalData, signal._originalData, mode=self.corrMode)
         self._cleanDataCorr = np.correlate(self._cleanData, signal._cleanData, mode=self.corrMode)
@@ -557,6 +562,7 @@ class Signal:
         self._stackCleanSignalFrames_Time_Freq()
         self._calcFreqSpectrums()
         self._calcCepstrums()
+        self._calcHanningWindow()
 
 def execCalc(event):
 
@@ -575,7 +581,8 @@ def execCalc(event):
         inputSingleRollTime.GetValue(),
         rangeTime,
         skipTime,
-        inputHideFreq.GetValue()
+        inputHideFreq.GetValue(),
+        inputHanningSize.GetValue()
     )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
@@ -590,7 +597,8 @@ def execCalc(event):
             inputSingleRollTime.GetValue(),
             rangeTime,
             skipTime,
-            inputHideFreq.GetValue()
+            inputHideFreq.GetValue(),
+            inputHanningSize.GetValue()
         )
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signalDiff = copy.deepcopy(signal1)
@@ -612,11 +620,11 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai v0.7.8'
+appTitle = 'Guoliu Gedimai v0.8'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 400)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 430)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 300))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 330))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(180, 90), size=(110, 20), value=(''))
 inputRange = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('1'))
@@ -631,6 +639,7 @@ inputFrame = wx.TextCtrl(frame,-1,pos=(180, 180), size=(50, 20), value=('1024'))
 inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('20'))
 inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
 inputHideFreq = wx.TextCtrl(frame,-1,pos=(180, 270), size=(50, 20), value=('0'))
+inputHanningSize = wx.TextCtrl(frame,-1,pos=(180, 300), size=(50, 20), value=('0'))
 
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
 font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
@@ -638,15 +647,16 @@ label0.SetFont(font)
 label0.SetForegroundColour(wx.Colour(14,181,56));
 frame.SetBackgroundColour(wx.Colour(225,225,225));
 label1 = wx.StaticText(frame, -1, 'Pirmas matavimu failas' , pos=(15, 60))
-label1 = wx.StaticText(frame, -1, 'Antras matavimu failas' , pos=(15, 90))
+label6 = wx.StaticText(frame, -1, 'Antras matavimu failas' , pos=(15, 90))
 label9 = wx.StaticText(frame, -1, 'Imtis' , pos=(15, 120))
 label5 = wx.StaticText(frame, -1, 'Praleisti' , pos=(15, 150))
 label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 180))
 label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 210))
 label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 240))
 label2 = wx.StaticText(frame, -1,'Slept pirmus daznius (Hz)', pos=(15, 270))
-label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 300))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 330))
+label4 = wx.StaticText(frame, -1,'Haningo lango dydis (Hz)', pos=(15, 300))
+label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 330))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 360))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
