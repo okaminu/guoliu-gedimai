@@ -114,11 +114,15 @@ class Signal:
     def _calcMeanFrame(self):
 
         bufIter = 0
-        buffer = [0] * self._frameSize
-        originalData = self._originalData
         frameSize = self._frameSize
+        originalData = self._originalData
+        size = len(originalData)-frameSize
+        if(size == 0):
+            size = self._frameSize
 
-        for iter in range(len(originalData)-frameSize):
+        buffer = [0] * self._frameSize
+
+        for iter in range(size):
             buffer[bufIter] = (buffer[bufIter] + originalData[iter]) / 2
             bufIter = bufIter+1
             if bufIter == frameSize:
@@ -131,10 +135,15 @@ class Signal:
         bufIter = 0
         originalData = self._originalData
         frameSize = self._frameSize
-        cleanData=[0]* (len(originalData)-frameSize)
+        size = (len(originalData)-frameSize)
         meanFrame = self._meanFrame
+        if(size == 0):
+            size = self._frameSize
 
-        for itera in range(len(originalData)-frameSize):
+        cleanData=[0]* size
+
+
+        for itera in range(size):
             cleanData[itera] = (originalData[itera] - meanFrame[bufIter]) / 2
             bufIter = bufIter+1
             if bufIter == frameSize:
