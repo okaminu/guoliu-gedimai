@@ -50,6 +50,7 @@ class Signal:
         self.freqSize = 25000
         self._hanningWindowSize = 0
         self._hanningAllow = 0
+        self._coorLength = 0.01
 
         self._originalDataCorr = []
         self._cleanDataCorr = []
@@ -65,9 +66,10 @@ class Signal:
         self._meanFrameCeps = []
         self._cleanTimeFrameCeps = []
 
-    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning):
+    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1):
         self._hideFreq = int(hideFreq)
         self.initValues()
+        self._coorLength = float(coorLength) /100
         self._hanningAllow = int(allowHanning)
         self._hanningWindowSize = int(hannSize)
         self._SingleRollTime = int(singleRollTime)
@@ -233,16 +235,23 @@ class Signal:
         return 0
 
 
+    def getSingleCoorelation(self, signal):
+        fullCoorelation = np.correlate(signal, signal, mode='full')
+        size = len(fullCoorelation)
+        halfCoorelation = fullCoorelation[size / 2:]
+        partialCoorelation = halfCoorelation[:(size / 2) * self._coorLength]
+        return partialCoorelation
+
     def calcCorrelation(self, signal):
-        self._originalDataCorr = np.correlate(self._originalData, signal._originalData, mode=self.corrMode)
-        self._cleanDataCorr = np.correlate(self._cleanData, signal._cleanData, mode=self.corrMode)
-        self._meanFrameCorr = np.correlate(self._meanFrame, signal._meanFrame, mode=self.corrMode)
-        self._cleanTimeFrameCorr = np.correlate(self._cleanTimeFrame, signal._cleanTimeFrame, mode=self.corrMode)
-        self._originalDataFreqCorr = np.correlate(self._originalDataFreq, signal._originalDataFreq, mode=self.corrMode)
-        self._cleanDataFreqCorr = np.correlate(self._cleanDataFreq, signal._cleanDataFreq, mode=self.corrMode)
-        self._meanFrameFreqCorr = np.correlate(self._meanFrameFreq, signal._meanFrameFreq, mode=self.corrMode)
-        self._cleanTimeFrameFreqCorr = np.correlate(self._cleanTimeFrameFreq, signal._cleanTimeFrameFreq, mode=self.corrMode)
-        self._cleanFreqFrameCorr = np.correlate(self._cleanFreqFrame, signal._cleanFreqFrame, mode=self.corrMode)
+        self._originalDataCorr = self.getSingleCoorelation(signal._originalData)
+        self._cleanDataCorr = self.getSingleCoorelation(signal._cleanData)
+        self._meanFrameCorr = self.getSingleCoorelation(signal._meanFrame)
+        self._cleanTimeFrameCorr = self.getSingleCoorelation(signal._cleanTimeFrame)
+        self._originalDataFreqCorr = self.getSingleCoorelation(signal._originalDataFreq)
+        self._cleanDataFreqCorr = self.getSingleCoorelation(signal._cleanDataFreq)
+        self._meanFrameFreqCorr = self.getSingleCoorelation(signal._meanFrameFreq)
+        self._cleanTimeFrameFreqCorr = self.getSingleCoorelation(signal._cleanTimeFrameFreq)
+        self._cleanFreqFrameCorr = self.getSingleCoorelation(signal._cleanFreqFrame)
 
     def _calcCepstrums(self):
         self._originalDataCeps = self.cepstrum(self._originalData)
@@ -586,7 +595,8 @@ def execCalc(event):
         skipTime,
         inputHideFreq.GetValue(),
         inputHanningSize.GetValue(),
-        inputHanningAllow.GetValue()
+        inputHanningAllow.GetValue(),
+        inputCoorelLength.GetValue()
     )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
@@ -603,7 +613,8 @@ def execCalc(event):
             skipTime,
             inputHideFreq.GetValue(),
             inputHanningSize.GetValue(),
-            inputHanningAllow.GetValue()
+            inputHanningAllow.GetValue(),
+            inputCoorelLength.GetValue()
         )
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signal1.addToLegend('Pirmas', 'g')
@@ -618,9 +629,9 @@ def execCalc(event):
         del signalDiff
         del signal2
 
-    #signal1.calcCorrelation(corrSignal)
+    signal1.calcCorrelation(corrSignal)
     signal1.setDrawLegend(1)
-    signal1.displayAllData('g', 'Pirmas')
+    signal1.displayAllData('g', 'Pirmas', 1)
     signal1.saveMaxFrequencyDistance('Pirmas');
     del signal1
     # Draw the plot to the screen
@@ -628,11 +639,11 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai v0.8.1'
+appTitle = 'Guoliu Gedimai v0.8.2'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 430)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 500)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 360))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 390))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(180, 90), size=(110, 20), value=(''))
 inputRange = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('1'))
@@ -649,6 +660,7 @@ inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
 inputHideFreq = wx.TextCtrl(frame,-1,pos=(180, 270), size=(50, 20), value=('0'))
 inputHanningSize = wx.TextCtrl(frame,-1,pos=(180, 300), size=(50, 20), value=('0'))
 inputHanningAllow = wx.CheckBox(frame,-1,pos=(180, 330), size=(50, 20))
+inputCoorelLength = wx.TextCtrl(frame,-1,pos=(180, 360), size=(50, 20), value=('1'))
 inputHanningAllow.SetValue(0)
 
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
@@ -666,8 +678,9 @@ label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 240))
 label2 = wx.StaticText(frame, -1,'Slept pirmus daznius (Hz)', pos=(15, 270))
 label4 = wx.StaticText(frame, -1,'Haningo lango dydis (Hz)', pos=(15, 300))
 label4 = wx.StaticText(frame, -1,'Skaiciuoti Haningo langa ?', pos=(15, 330))
-label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 360))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 390))
+label15 = wx.StaticText(frame, -1,'Koreliacijos ilgis (%)', pos=(15, 360))
+label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 390))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 450))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
