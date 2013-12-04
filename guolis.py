@@ -49,6 +49,7 @@ class Signal:
         self.corrMode = 'full'
         self.freqSize = 25000
         self._hanningWindowSize = 0
+        self._hanningAllow = 0
 
         self._originalDataCorr = []
         self._cleanDataCorr = []
@@ -64,9 +65,10 @@ class Signal:
         self._meanFrameCeps = []
         self._cleanTimeFrameCeps = []
 
-    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize):
+    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning):
         self._hideFreq = int(hideFreq)
-        self.initValues();
+        self.initValues()
+        self._hanningAllow = int(allowHanning)
         self._hanningWindowSize = int(hannSize)
         self._SingleRollTime = int(singleRollTime)
         self._rolls = int(range)
@@ -222,8 +224,9 @@ class Signal:
 
 
     def _calcHanningWindow(self):
-        #self._originalDataFreq = self.filterHanningWindow(self._originalDataFreq, self._hanningWindowSize, self.freqSize)
-        #self._cleanDataFreq = self.filterHanningWindow(self._cleanDataFreq, self._hanningWindowSize, self.freqSize)
+        if(self._hanningAllow == 1):
+            self._originalDataFreq = self.filterHanningWindow(self._originalDataFreq, self._hanningWindowSize, self.freqSize)
+            self._cleanDataFreq = self.filterHanningWindow(self._cleanDataFreq, self._hanningWindowSize, self.freqSize)
         self._meanFrameFreq = self.filterHanningWindow(self._meanFrameFreq, self._hanningWindowSize, self.freqSize)
         self._cleanTimeFrameFreq = self.filterHanningWindow(self._cleanTimeFrameFreq, self._hanningWindowSize, self.freqSize)
         self._cleanFreqFrame = self.filterHanningWindow(self._cleanFreqFrame, self._hanningWindowSize, self.freqSize)
@@ -582,7 +585,8 @@ def execCalc(event):
         rangeTime,
         skipTime,
         inputHideFreq.GetValue(),
-        inputHanningSize.GetValue()
+        inputHanningSize.GetValue(),
+        inputHanningAllow.GetValue()
     )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
@@ -598,14 +602,18 @@ def execCalc(event):
             rangeTime,
             skipTime,
             inputHideFreq.GetValue(),
-            inputHanningSize.GetValue()
+            inputHanningSize.GetValue(),
+            inputHanningAllow.GetValue()
         )
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
+        signal1.addToLegend('Pirmas', 'g')
+        signal1.addToLegend('Antras', 'b')
+        signal1.addToLegend('Skirtumas', 'r')
         signalDiff = copy.deepcopy(signal1)
         signalDiff.substractFrom(signal2)
         signalDiff.displayAllData('r', 'Skirtumas')
         signal2.displayAllData('b', 'Antras')
-        signal2.saveMaxFrequencyDistance('Antras');
+        signal2.saveMaxFrequencyDistance('Antras')
         corrSignal = signal2
         del signalDiff
         del signal2
@@ -624,7 +632,7 @@ appTitle = 'Guoliu Gedimai v0.8'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 430)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 330))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 360))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(180, 90), size=(110, 20), value=(''))
 inputRange = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('1'))
@@ -640,6 +648,8 @@ inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=
 inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
 inputHideFreq = wx.TextCtrl(frame,-1,pos=(180, 270), size=(50, 20), value=('0'))
 inputHanningSize = wx.TextCtrl(frame,-1,pos=(180, 300), size=(50, 20), value=('0'))
+inputHanningAllow = wx.CheckBox(frame,-1,pos=(180, 330), size=(50, 20))
+inputHanningAllow.SetValue(0)
 
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
 font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
@@ -655,8 +665,9 @@ label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 210))
 label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 240))
 label2 = wx.StaticText(frame, -1,'Slept pirmus daznius (Hz)', pos=(15, 270))
 label4 = wx.StaticText(frame, -1,'Haningo lango dydis (Hz)', pos=(15, 300))
-label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 330))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 360))
+label4 = wx.StaticText(frame, -1,'Skaiciuoti Haningo langa ?', pos=(15, 330))
+label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 360))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 390))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
