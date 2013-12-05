@@ -237,6 +237,7 @@ class Signal:
 
     def getSingleCoorelation(self, signal):
         fullCoorelation = np.correlate(signal, signal, mode='full')
+        fullCoorelation = fullCoorelation / np.max(fullCoorelation)
         size = len(fullCoorelation)
         halfCoorelation = fullCoorelation[size / 2:]
         partialCoorelation = halfCoorelation[:(size / 2) * self._coorLength]
