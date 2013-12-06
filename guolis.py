@@ -44,7 +44,7 @@ class Signal:
         self.rmsLocation = "statistics/RMS/"
         self.statisticsLocation = "statistics/"
         self.distanceLocation = "statistics/distance/"
-        self.distanceTreshold = 100 #atstumas po kurio vel prades ieskoti kitos minimalios reiksmes
+        self.distanceTreshold = 0 #atstumas po kurio vel prades ieskoti kitos minimalios reiksmes
         self._hideFreq
         self.corrMode = 'full'
         self.freqSize = 25000
@@ -66,9 +66,10 @@ class Signal:
         self._meanFrameCeps = []
         self._cleanTimeFrameCeps = []
 
-    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1):
+    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100):
         self._hideFreq = int(hideFreq)
         self.initValues()
+        self.distanceTreshold = int(distanceTreshold)
         self._coorLength = float(coorLength) /100
         self._hanningAllow = int(allowHanning)
         self._hanningWindowSize = int(hannSize)
@@ -335,29 +336,35 @@ class Signal:
 
     def saveSignalMaxDistance(self, signalName, signalData):
         originalFreqMax = self.twoMax(signalData)
+        Length = float(len(signalData))
+        fraction = (self.freqSize / Length)
+        firstFreqIndex = originalFreqMax['firstIndex'] * fraction
+        secondFreqIndex = originalFreqMax['secondIndex'] * fraction
         data = ['--- '+ signalName +' ---',
                 'Didziausia: '+str(originalFreqMax['first']),
                 'Antra didziausia:'+str(originalFreqMax['second']),
-                'Pirmas Indeksas:'+str(originalFreqMax['firstIndex']),
-                'Antras Indeksas:'+str(originalFreqMax['secondIndex']),
-                'Atstumas:'+ str(abs(originalFreqMax['firstIndex'] - originalFreqMax['secondIndex']))]
+                'Pirmas Indeksas:'+str(firstFreqIndex),
+                'Antras Indeksas:'+str(secondFreqIndex),
+                'Atstumas:'+ str(abs(firstFreqIndex - secondFreqIndex))]
         self._saveData(self.distanceLocation, signalName, {'values':data})
-
 
     def twoMax(self, numbers):
         m1, m2 = None, None
         m1Index, m2Index, count = 0, 0, 0
-        skipCount = self.distanceTreshold
+        Length = float(len(numbers))
+        fraction = (Length / self.freqSize)
+        distanceExact = int(self.distanceTreshold * (Length / self.freqSize))
+        skipCount = distanceExact
         skip = skipCount
         for val in numbers:
             if skip > skipCount:
-                if val > m1:
+                if (val) > m1 and (numbers[count-1]) < val and numbers[count+1] < val:
                     m2 = m1
                     m1 = val
                     m2Index = m1Index
                     m1Index = count
                     skip = 0
-                elif val > m2:
+                elif (val) > m2 and (numbers[count-1]) < val and numbers[count+1] < val:
                     m2 = val
                     m2Index = count
             else:
@@ -425,6 +432,12 @@ class Signal:
                 data[iter]['values'][i]=0
             localFreMark = (Lenght / 25000) * self._freMark
             plt.bar(localFreMark, max(data[iter]['values']), width=0.8, edgecolor = '#CCCCCC')
+
+            #Max display
+            freqMax = self.twoMax(data[iter]['values'])
+            plt.bar(freqMax['firstIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
+            plt.bar(freqMax['secondIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
+
             plt.plot(range(0, int(Lenght)), data[iter]['values'], displayParams)
             plt.title(data[iter]['title'])
             xAxisMarkerPlacement = [Lenght * 0, Lenght * 0.2, Lenght * 0.4, Lenght * 0.6, Lenght * 0.8, Lenght * 1]
@@ -597,7 +610,8 @@ def execCalc(event):
         inputHideFreq.GetValue(),
         inputHanningSize.GetValue(),
         inputHanningAllow.GetValue(),
-        inputCoorelLength.GetValue()
+        inputCoorelLength.GetValue(),
+        inputMaxTreshold.GetValue()
     )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
@@ -615,7 +629,8 @@ def execCalc(event):
             inputHideFreq.GetValue(),
             inputHanningSize.GetValue(),
             inputHanningAllow.GetValue(),
-            inputCoorelLength.GetValue()
+            inputCoorelLength.GetValue(),
+            inputMaxTreshold.GetValue()
         )
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signal1.addToLegend('Pirmas', 'g')
@@ -644,7 +659,7 @@ appTitle = 'Guoliu Gedimai v0.8.2'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 500)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 390))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 420))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(180, 90), size=(110, 20), value=(''))
 inputRange = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('1'))
@@ -662,6 +677,7 @@ inputHideFreq = wx.TextCtrl(frame,-1,pos=(180, 270), size=(50, 20), value=('0'))
 inputHanningSize = wx.TextCtrl(frame,-1,pos=(180, 300), size=(50, 20), value=('0'))
 inputHanningAllow = wx.CheckBox(frame,-1,pos=(180, 330), size=(50, 20))
 inputCoorelLength = wx.TextCtrl(frame,-1,pos=(180, 360), size=(50, 20), value=('1'))
+inputMaxTreshold = wx.TextCtrl(frame,-1,pos=(180, 390), size=(50, 20), value=('500'))
 inputHanningAllow.SetValue(0)
 
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
@@ -680,7 +696,8 @@ label2 = wx.StaticText(frame, -1,'Slept pirmus daznius (Hz)', pos=(15, 270))
 label4 = wx.StaticText(frame, -1,'Haningo lango dydis (Hz)', pos=(15, 300))
 label4 = wx.StaticText(frame, -1,'Skaiciuoti Haningo langa ?', pos=(15, 330))
 label15 = wx.StaticText(frame, -1,'Koreliacijos ilgis (%)', pos=(15, 360))
-label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 390))
+label16 = wx.StaticText(frame, -1,'Maksimumu nuolydis (Hz)', pos=(15, 390))
+label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 420))
 label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 450))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
