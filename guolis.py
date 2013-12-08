@@ -51,6 +51,7 @@ class Signal:
         self._hanningWindowSize = 0
         self._hanningAllow = 0
         self._coorLength = 0.01
+        self._rollsOffset = 0
 
         self._originalDataCorr = []
         self._cleanDataCorr = []
@@ -66,9 +67,10 @@ class Signal:
         self._meanFrameCeps = []
         self._cleanTimeFrameCeps = []
 
-    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100):
+    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100, rollsOffset = 0):
         self._hideFreq = int(hideFreq)
         self.initValues()
+        self._rollsOffset = float(rollsOffset)
         self.distanceTreshold = int(distanceTreshold)
         self._coorLength = float(coorLength) /100
         self._hanningAllow = int(allowHanning)
@@ -82,6 +84,7 @@ class Signal:
         if(isSkipTime == 1):
             skipFrames = self.convertTimeToRolls(skip)
         self._skip = self._skip + (skipFrames * self._frameSize)
+        self._skip = self._skip + int(self._rollsOffset * self._frameSize)
         self._limit = self._rolls * self._frameSize
         self._limit = self._skip + self._limit
         self._freMark = float(freMark)
@@ -611,7 +614,8 @@ def execCalc(event):
         inputHanningSize.GetValue(),
         inputHanningAllow.GetValue(),
         inputCoorelLength.GetValue(),
-        inputMaxTreshold.GetValue()
+        inputMaxTreshold.GetValue(),
+        inputOffsetSignal1.GetValue()
     )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
@@ -630,7 +634,8 @@ def execCalc(event):
             inputHanningSize.GetValue(),
             inputHanningAllow.GetValue(),
             inputCoorelLength.GetValue(),
-            inputMaxTreshold.GetValue()
+            inputMaxTreshold.GetValue(),
+            inputOffsetSignal2.GetValue()
         )
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signal1.addToLegend('Pirmas', 'g')
@@ -671,13 +676,16 @@ isSkipTime = wx.RadioButton(frame,label = 'sekundes',pos=(240, 150), style=wx.RB
 isSkipPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(340, 150))
 isSkipTime.SetValue(1)
 inputFrame = wx.TextCtrl(frame,-1,pos=(180, 180), size=(50, 20), value=('1024'))
-inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('20'))
+inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(180, 210), size=(50, 20), value=('40'))
 inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
 inputHideFreq = wx.TextCtrl(frame,-1,pos=(180, 270), size=(50, 20), value=('0'))
 inputHanningSize = wx.TextCtrl(frame,-1,pos=(180, 300), size=(50, 20), value=('0'))
 inputHanningAllow = wx.CheckBox(frame,-1,pos=(180, 330), size=(50, 20))
 inputCoorelLength = wx.TextCtrl(frame,-1,pos=(180, 360), size=(50, 20), value=('1'))
 inputMaxTreshold = wx.TextCtrl(frame,-1,pos=(180, 390), size=(50, 20), value=('500'))
+
+inputOffsetSignal1 = wx.TextCtrl(frame,-1,pos=(300, 60), size=(50, 20), value=('0'))
+inputOffsetSignal2 = wx.TextCtrl(frame,-1,pos=(300, 90), size=(50, 20), value=('0'))
 inputHanningAllow.SetValue(0)
 
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
@@ -699,6 +707,8 @@ label15 = wx.StaticText(frame, -1,'Koreliacijos ilgis (%)', pos=(15, 360))
 label16 = wx.StaticText(frame, -1,'Maksimumu nuolydis (Hz)', pos=(15, 390))
 label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 420))
 label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 450))
+label17 = wx.StaticText(frame, -1,"poslinkis", pos=(360, 60))
+label18 = wx.StaticText(frame, -1,"poslinkis", pos=(360, 90))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
