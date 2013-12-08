@@ -266,12 +266,15 @@ class Signal:
 
 
     def cepstrum(self, signal):
-        temp = abs(np.fft.rfft(signal))
+        # arr = []
+        # for i in range(0, 360):
+        #     arr.append(math.sin(math.radians(i)))
+        temp = abs(np.fft.fft(signal))
         for index, item in enumerate(temp):
             if(temp[index] == 0):
                 temp[index] = 0.00001
 
-        cepstrum = abs(np.fft.irfft(np.log(temp)))
+        cepstrum = np.fft.ifft(np.log(temp))
         return cepstrum
 
     def _rmsOriginal (self):
@@ -385,7 +388,7 @@ class Signal:
         for iter in range(len(data['values'])):
             file.writelines(str(data['values'][iter]) +"\n")
 
-    def _displayTime(self, data, displayParams, marking = 's'):
+    def _displayTime(self, data, displayParams, marking = 's', grid = 1):
         self._lastFigure+=1
         plt.figure(self._lastFigure)
         subplots = 211
@@ -412,11 +415,13 @@ class Signal:
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
 
             Lenght = float(len(data[iter]['values']))
-            gridPart = (Lenght/8)
-            gridMark = [gridPart * 1, gridPart * 2, gridPart * 3, gridPart * 4, gridPart * 5, gridPart * 6, gridPart * 7, gridPart * 8]
-            for i in range(len(gridMark)):
-                height = abs(max(data[iter]['values'])) + abs(min(data[iter]['values']))
-                plt.bar(gridMark[i], height, width=1, edgecolor = '#000000', bottom= min(data[iter]['values']))
+
+            if(grid==1):
+                gridPart = (Lenght/8)
+                gridMark = [gridPart * 1, gridPart * 2, gridPart * 3, gridPart * 4, gridPart * 5, gridPart * 6, gridPart * 7, gridPart * 8]
+                for i in range(len(gridMark)):
+                    height = abs(max(data[iter]['values'])) + abs(min(data[iter]['values']))
+                    plt.bar(gridMark[i], height, width=1, edgecolor = '#000000', bottom= min(data[iter]['values']))
         if(self.isDrawLegend == 1):
                 self.drawLegend()
 
@@ -504,11 +509,11 @@ class Signal:
     def displayAllCepstrums(self, displayParams):
         originalCepstDisplay = {'values' : self._originalDataCeps, 'title' : 'Originalus (Laikas) Kepstras'}
         cleanCepstDisplay = {'values' : self._cleanDataCeps, 'title' : 'Centruotas (Laikas) Kepstras'}
-        self._displayTime({0:originalCepstDisplay, 1: cleanCepstDisplay}, displayParams, 's')
+        self._displayTime({0:originalCepstDisplay, 1: cleanCepstDisplay}, displayParams, 's', 0)
 
         meanCepstDisplay = {'values' : self._meanFrameCeps, 'title' : 'Originalo vidurkis (Laikas) Kepstras'}
         cleanFrameCepstDisplay = {'values' : self._cleanTimeFrameCeps, 'title' : 'Centruoto vidurkis (Laikas) Kepstras'}
-        self._displayTime({0:meanCepstDisplay, 1: cleanFrameCepstDisplay}, displayParams,'ms')
+        self._displayTime({0:meanCepstDisplay, 1: cleanFrameCepstDisplay}, displayParams,'ms', 0)
 
     def displayAllCorrelations(self, displayParams):
         originalCorrDisplay = {'values' : self._originalDataCorr, 'title' : 'Originalus (Laikas) Koreliacija'}
