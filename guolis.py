@@ -239,8 +239,8 @@ class Signal:
         return 0
 
 
-    def getSingleCoorelation(self, signal):
-        fullCoorelation = np.correlate(signal, signal, mode='full')
+    def getSingleCoorelation(self, signal1, signal2):
+        fullCoorelation = np.correlate(signal1, signal2, mode='full')
         fullCoorelation = fullCoorelation / np.max(fullCoorelation)
         size = len(fullCoorelation)
         halfCoorelation = fullCoorelation[size / 2:]
@@ -248,15 +248,15 @@ class Signal:
         return partialCoorelation
 
     def calcCorrelation(self, signal):
-        self._originalDataCorr = self.getSingleCoorelation(signal._originalData)
-        self._cleanDataCorr = self.getSingleCoorelation(signal._cleanData)
-        self._meanFrameCorr = self.getSingleCoorelation(signal._meanFrame)
-        self._cleanTimeFrameCorr = self.getSingleCoorelation(signal._cleanTimeFrame)
-        self._originalDataFreqCorr = self.getSingleCoorelation(signal._originalDataFreq)
-        self._cleanDataFreqCorr = self.getSingleCoorelation(signal._cleanDataFreq)
-        self._meanFrameFreqCorr = self.getSingleCoorelation(signal._meanFrameFreq)
-        self._cleanTimeFrameFreqCorr = self.getSingleCoorelation(signal._cleanTimeFrameFreq)
-        self._cleanFreqFrameCorr = self.getSingleCoorelation(signal._cleanFreqFrame)
+        self._originalDataCorr = self.getSingleCoorelation(signal._originalData, self._originalData)
+        self._cleanDataCorr = self.getSingleCoorelation(signal._cleanData, self._cleanData)
+        self._meanFrameCorr = self.getSingleCoorelation(signal._meanFrame, self._meanFrame)
+        self._cleanTimeFrameCorr = self.getSingleCoorelation(signal._cleanTimeFrame, self._cleanTimeFrame)
+        self._originalDataFreqCorr = self.getSingleCoorelation(signal._originalDataFreq, self._originalDataFreq)
+        self._cleanDataFreqCorr = self.getSingleCoorelation(signal._cleanDataFreq, self._cleanDataFreq)
+        self._meanFrameFreqCorr = self.getSingleCoorelation(signal._meanFrameFreq, self._meanFrameFreq)
+        self._cleanTimeFrameFreqCorr = self.getSingleCoorelation(signal._cleanTimeFrameFreq, self._cleanTimeFrameFreq)
+        self._cleanFreqFrameCorr = self.getSingleCoorelation(signal._cleanFreqFrame, self._cleanFreqFrame)
 
     def _calcCepstrums(self):
         self._originalDataCeps = self.cepstrum(self._originalData)
@@ -651,7 +651,7 @@ def execCalc(event):
         signalDiff.displayAllData('r', 'Skirtumas')
         signal2.displayAllData('b', 'Antras')
         signal2.saveMaxFrequencyDistance('Antras')
-        corrSignal = signal2
+        corrSignal = copy.deepcopy(signal2)
         del signalDiff
         del signal2
 
