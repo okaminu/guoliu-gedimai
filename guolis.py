@@ -525,7 +525,7 @@ class Signal:
         self._displayCorr({0:meanCorrDisplay, 1: cleanFrameCorrDisplay}, displayParams)
 
         origFreqCorrDisplay = {'values' : self._originalDataFreqCorr, 'title' : 'Originalus (Daznis) Koreliacija'}
-        cleanFreqCorrDisplay = {'values' : self._cleanDataCorr, 'title' : 'Centruotas (Daznis) Koreliacija'}
+        cleanFreqCorrDisplay = {'values' : self._cleanDataFreqCorr, 'title' : 'Centruotas (Daznis) Koreliacija'}
         self._displayCorr({0:origFreqCorrDisplay, 1: cleanFreqCorrDisplay}, displayParams)
 
         meanFreqFrameCorrDisplay = {'values' : self._meanFrameFreqCorr, 'title' : 'Originalo vidurkis (Daznis) Koreliacija'}
