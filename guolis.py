@@ -686,7 +686,7 @@ inputFreMark = wx.TextCtrl(frame,-1,pos=(180, 240), size=(50, 20), value=('0'))
 inputHideFreq = wx.TextCtrl(frame,-1,pos=(180, 270), size=(50, 20), value=('0'))
 inputHanningSize = wx.TextCtrl(frame,-1,pos=(180, 300), size=(50, 20), value=('0'))
 inputHanningAllow = wx.CheckBox(frame,-1,pos=(180, 330), size=(50, 20))
-inputCoorelLength = wx.TextCtrl(frame,-1,pos=(180, 360), size=(50, 20), value=('1'))
+inputCoorelLength = wx.TextCtrl(frame,-1,pos=(180, 360), size=(50, 20), value=('25'))
 inputMaxTreshold = wx.TextCtrl(frame,-1,pos=(180, 390), size=(50, 20), value=('500'))
 
 inputOffsetSignal1 = wx.TextCtrl(frame,-1,pos=(300, 60), size=(50, 20), value=('0'))
