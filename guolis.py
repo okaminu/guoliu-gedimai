@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import array, exp
 import math
 import matplotlib.pyplot as plt
 import re
@@ -269,13 +270,35 @@ class Signal:
         # arr = []
         # for i in range(0, 360):
         #     arr.append(math.sin(math.radians(i)))
-        temp = abs(np.fft.fft(signal))
-        for index, item in enumerate(temp):
-            if(temp[index] == 0):
-                temp[index] = 0.00001
+        # temp = abs(np.fft.fft(signal))
+        # for index, item in enumerate(temp):
+        #     if(temp[index] == 0):
+        #         temp[index] = 0.00001
+        #
+        # cepstrum = np.fft.ifft(np.log(temp))
+        # return cepstrum
 
-        cepstrum = np.fft.ifft(np.log(temp))
-        return cepstrum
+        table = signal
+        pad_size = 0
+        table = list(table)
+            # table should be a real-valued table of FIR coefficients
+        convolution_size = len(table)
+        table += [0] * (convolution_size * (pad_size - 1))
+
+        # compute the real cepstrum
+        # fft -> abs + ln -> ifft -> real
+        cepstrum = np.fft.ifft(map(lambda x: math.log(x), abs(np.fft.fft(table))))
+        # because the positive and negative freqs were equal, imaginary content is neglible
+        # cepstrum = map(lambda x: x.real, cepstrum)
+
+        # window the cepstrum in such a way that anticausal components become rejected
+        cepstrum[1                :len(cepstrum)/2] *= 2;
+        cepstrum[len(cepstrum)/2+1:len(cepstrum)  ] *= 0;
+
+        # now cancel the previous steps:
+        # fft -> exp -> ifft -> real
+        cepstrum = np.fft.ifft(map(exp, np.fft.fft(cepstrum)))
+        return map(lambda x: x.real, cepstrum[0:convolution_size])
 
     def _rmsOriginal (self):
         sum = 0
@@ -486,11 +509,11 @@ class Signal:
     def displayAllTime(self, displayParams):
         originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'}
         cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'}
-        self._displayTime({0:originalDisplay, 1: cleanDisplay}, displayParams, 's')
+        self._displayTime({0:originalDisplay, 1: cleanDisplay}, displayParams, 's', 0)
 
         meanDisplay = {'values' : self._meanFrame, 'title' : 'Originalo vidurkis (Laikas)'}
         cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Centruoto vidurkis (Laikas)'}
-        self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, displayParams,'ms')
+        self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, displayParams,'ms', 0)
 
 
     def displayAllFreq(self, displayParams):
