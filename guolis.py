@@ -91,6 +91,12 @@ class Signal:
         self._freMark = float(freMark)
         self._displayParams = self._displayParams
 
+    # this is wrong and dirty on so many levels...
+    @staticmethod
+    def clearClassVariables():
+        Signal.signalData = []
+        Signal.signalNames = []
+
     def convertTimeToRolls(self, time):
         msTime = int(float(time)) * 1000
         return int(float(msTime / self._SingleRollTime))
@@ -101,7 +107,6 @@ class Signal:
     def convertRollsToTime(self, rolls):
         rollsMs = float(rolls * self._SingleRollTime)
         return  float(rollsMs / 1000)
-
 
     def _loadOriginal_File(self, location):
         fileData1 = open(location, "r")
@@ -683,6 +688,7 @@ def execCalc(event):
     signal1.displayAllData('g', 'Pirmas', 1)
     signal1.saveMaxFrequencyDistance('Pirmas');
     del signal1
+    Signal.clearClassVariables()
     # Draw the plot to the screen
     plt.show()
 
