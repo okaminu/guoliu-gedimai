@@ -52,7 +52,7 @@ class Signal:
         self._hanningWindowSize = 0
         self._hanningAllow = 0
         self._coorLength = 0.01
-        self._rollsOffset = 0
+        self._rollsOffset = 0.5
 
         self._originalDataCorr = []
         self._cleanDataCorr = []
@@ -68,7 +68,7 @@ class Signal:
         self._meanFrameCeps = []
         self._cleanTimeFrameCeps = []
 
-    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100, fileCol = 0):
+    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100, fileCol = 0, isHalfRoll = 0):
         self._hideFreq = int(hideFreq)
         self.initValues()
         self._fileCol = int(fileCol)
@@ -85,7 +85,8 @@ class Signal:
         if(isSkipTime == 1):
             skipFrames = self.convertTimeToRolls(skip)
         self._skip = self._skip + (skipFrames * self._frameSize)
-        self._skip = self._skip + int(self._rollsOffset * self._frameSize)
+        if(isHalfRoll == 1):
+            self._skip = self._skip + int(self._rollsOffset * self._frameSize)
         self._limit = self._rolls * self._frameSize
         self._limit = self._skip + self._limit
         self._freMark = float(freMark)
@@ -651,7 +652,8 @@ def execCalc(event):
         inputHanningAllow.GetValue(),
         inputCoorelLength.GetValue(),
         inputMaxTreshold.GetValue(),
-        inputColumnSignal1.GetValue()
+        inputColumnSignal1.GetValue(),
+        0
     )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
@@ -671,7 +673,8 @@ def execCalc(event):
             inputHanningAllow.GetValue(),
             inputCoorelLength.GetValue(),
             inputMaxTreshold.GetValue(),
-            inputColumnSignal2.GetValue()
+            inputColumnSignal2.GetValue(),
+            inputIsHalfRoll.GetValue()
         )
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signal1.addToLegend('Pirmas', 'g')
@@ -699,27 +702,29 @@ def execCalc(event):
 
 appTitle = 'Guoliu Gedimai v0.8.6'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 520)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 430))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 460))
 inputFile = wx.TextCtrl(frame,-1,pos=(200, 60), size=(110, 20), value=('m6.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(200, 90), size=(110, 20), value=(''))
-inputSkip = wx.TextCtrl(frame,-1,pos=(200, 120), size=(50, 20), value=('50'))
-inputRange = wx.TextCtrl(frame,-1,pos=(200, 150), size=(50, 20), value=('10'))
-isSkipTime = wx.RadioButton(frame,label = 'sekundes',pos=(360, 120), style=wx.RB_GROUP)
-isSkipPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(260, 120))
+inputSkip = wx.TextCtrl(frame,-1,pos=(200, 150), size=(50, 20), value=('50'))
+inputRange = wx.TextCtrl(frame,-1,pos=(200, 180), size=(50, 20), value=('10'))
+isSkipTime = wx.RadioButton(frame,label = 'sekundes',pos=(360, 150), style=wx.RB_GROUP)
+isSkipPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(260, 150))
 isSkipPoint.SetValue(1)
-isInputTime = wx.RadioButton(frame,label = 'sekundes',pos=(360, 150), style=wx.RB_GROUP)
-isInputPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(260, 150))
+isInputTime = wx.RadioButton(frame,label = 'sekundes',pos=(360, 180), style=wx.RB_GROUP)
+isInputPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(260, 180))
 isInputPoint.SetValue(1)
-inputFrame = wx.TextCtrl(frame,-1,pos=(200, 180), size=(50, 20), value=('1024'))
-inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(200, 210), size=(50, 20), value=('40'))
-inputFreMark = wx.TextCtrl(frame,-1,pos=(200, 240), size=(50, 20), value=('0'))
-inputHideFreq = wx.TextCtrl(frame,-1,pos=(200, 270), size=(50, 20), value=('0'))
-inputHanningSize = wx.TextCtrl(frame,-1,pos=(200, 300), size=(50, 20), value=('0'))
-inputHanningAllow = wx.CheckBox(frame,-1,pos=(235, 330), size=(50, 20))
-inputCoorelLength = wx.TextCtrl(frame,-1,pos=(200, 360), size=(50, 20), value=('25'))
-inputMaxTreshold = wx.TextCtrl(frame,-1,pos=(200, 390), size=(50, 20), value=('500'))
+inputFrame = wx.TextCtrl(frame,-1,pos=(200, 210), size=(50, 20), value=('1024'))
+inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(200, 240), size=(50, 20), value=('40'))
+inputFreMark = wx.TextCtrl(frame,-1,pos=(200, 270), size=(50, 20), value=('0'))
+inputHideFreq = wx.TextCtrl(frame,-1,pos=(200, 300), size=(50, 20), value=('0'))
+inputHanningSize = wx.TextCtrl(frame,-1,pos=(200, 330), size=(50, 20), value=('0'))
+inputHanningAllow = wx.CheckBox(frame,-1,pos=(235, 360), size=(50, 20))
+inputCoorelLength = wx.TextCtrl(frame,-1,pos=(200, 390), size=(50, 20), value=('25'))
+inputMaxTreshold = wx.TextCtrl(frame,-1,pos=(200, 420), size=(50, 20), value=('500'))
+inputIsHalfRoll = wx.CheckBox(frame,-1,pos=(200, 120), size=(50, 20))
+inputIsHalfRoll.SetValue(0)
 
 inputColumnSignal1 = wx.TextCtrl(frame,-1,pos=(320, 60), size=(50, 20), value=('3'))
 inputColumnSignal2 = wx.TextCtrl(frame,-1,pos=(320, 90), size=(50, 20), value=('3'))
@@ -732,19 +737,21 @@ label0.SetForegroundColour(wx.Colour(14,181,56));
 frame.SetBackgroundColour(wx.Colour(225,225,225));
 label1 = wx.StaticText(frame, -1, 'Pirmas matavimu failas' , pos=(15, 60))
 label6 = wx.StaticText(frame, -1, 'Antras matavimu failas' , pos=(15, 90))
-label5 = wx.StaticText(frame, -1, 'Praleisti' , pos=(15, 120))
-label9 = wx.StaticText(frame, -1, 'Imtis' , pos=(15, 150))
-label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 180))
-label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 210))
-label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 240))
-label2 = wx.StaticText(frame, -1,'Slept pirmus daznius (Hz)', pos=(15, 270))
-label4 = wx.StaticText(frame, -1,'Haningo lango dydis (Hz)', pos=(15, 300))
-label4 = wx.StaticText(frame, -1,'Haningo langas pirminiui signalui', pos=(15, 330))
-label15 = wx.StaticText(frame, -1,'Koreliacijos ilgis (%)', pos=(15, 360))
-label16 = wx.StaticText(frame, -1,'Maksimumu nuolydis (Hz)', pos=(15, 390))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 470))
+label19 = wx.StaticText(frame, -1,"Ivertinti ritinio vieta", pos=(15, 120))
+label5 = wx.StaticText(frame, -1, 'Praleisti' , pos=(15, 150))
+label9 = wx.StaticText(frame, -1, 'Imtis' , pos=(15, 180))
+label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 210))
+label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 240))
+label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 270))
+label2 = wx.StaticText(frame, -1,'Slept pirmus daznius (Hz)', pos=(15, 300))
+label4 = wx.StaticText(frame, -1,'Haningo lango dydis (Hz)', pos=(15, 330))
+label4 = wx.StaticText(frame, -1,'Haningo langas pirminiui signalui', pos=(15, 360))
+label15 = wx.StaticText(frame, -1,'Koreliacijos ilgis (%)', pos=(15, 390))
+label16 = wx.StaticText(frame, -1,'Maksimumu nuolydis (Hz)', pos=(15, 420))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 510))
 label17 = wx.StaticText(frame, -1,"stulpelis", pos=(380, 60))
 label18 = wx.StaticText(frame, -1,"stulpelis", pos=(380, 90))
+
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
