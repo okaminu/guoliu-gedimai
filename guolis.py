@@ -697,11 +697,11 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai v0.8.5'
+appTitle = 'Guoliu Gedimai v0.8.6'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 500)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 520)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 420))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 430))
 inputFile = wx.TextCtrl(frame,-1,pos=(180, 60), size=(110, 20), value=('m6.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(180, 90), size=(110, 20), value=(''))
 inputRange = wx.TextCtrl(frame,-1,pos=(180, 120), size=(50, 20), value=('10'))
@@ -742,8 +742,7 @@ label4 = wx.StaticText(frame, -1,'Haningo lango dydis (Hz)', pos=(15, 300))
 label4 = wx.StaticText(frame, -1,'Skaiciuoti Haningo langa ?', pos=(15, 330))
 label15 = wx.StaticText(frame, -1,'Koreliacijos ilgis (%)', pos=(15, 360))
 label16 = wx.StaticText(frame, -1,'Maksimumu nuolydis (Hz)', pos=(15, 390))
-label10 = wx.StaticText(frame, -1,'Veiksmas', pos=(15, 420))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 450))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 470))
 label17 = wx.StaticText(frame, -1,"poslinkis", pos=(360, 60))
 label18 = wx.StaticText(frame, -1,"poslinkis", pos=(360, 90))
 label12.SetForegroundColour(wx.Colour(173,88,88));
