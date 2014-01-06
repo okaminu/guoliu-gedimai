@@ -16,7 +16,7 @@ class Signal:
     signalData = []
 
     def initValues(self):
-        self._fileCol = 3
+        self._fileCol = 0
         self._lastFigure = 0
         self._rolls = 0
         self._rmsOrig = ''
@@ -68,10 +68,10 @@ class Signal:
         self._meanFrameCeps = []
         self._cleanTimeFrameCeps = []
 
-    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100, rollsOffset = 0):
+    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100, fileCol = 0):
         self._hideFreq = int(hideFreq)
         self.initValues()
-        self._rollsOffset = float(rollsOffset)
+        self._fileCol = int(fileCol)
         self.distanceTreshold = int(distanceTreshold)
         self._coorLength = float(coorLength) /100
         self._hanningAllow = int(allowHanning)
@@ -651,7 +651,7 @@ def execCalc(event):
         inputHanningAllow.GetValue(),
         inputCoorelLength.GetValue(),
         inputMaxTreshold.GetValue(),
-        inputOffsetSignal1.GetValue()
+        inputColumnSignal1.GetValue()
     )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
@@ -671,7 +671,7 @@ def execCalc(event):
             inputHanningAllow.GetValue(),
             inputCoorelLength.GetValue(),
             inputMaxTreshold.GetValue(),
-            inputOffsetSignal2.GetValue()
+            inputColumnSignal2.GetValue()
         )
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signal1.addToLegend('Pirmas', 'g')
@@ -706,11 +706,11 @@ inputFile = wx.TextCtrl(frame,-1,pos=(200, 60), size=(110, 20), value=('m6.txt')
 inputFile2 = wx.TextCtrl(frame,-1,pos=(200, 90), size=(110, 20), value=(''))
 inputSkip = wx.TextCtrl(frame,-1,pos=(200, 120), size=(50, 20), value=('50'))
 inputRange = wx.TextCtrl(frame,-1,pos=(200, 150), size=(50, 20), value=('10'))
-isSkipPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(260, 120))
 isSkipTime = wx.RadioButton(frame,label = 'sekundes',pos=(360, 120), style=wx.RB_GROUP)
+isSkipPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(260, 120))
 isSkipPoint.SetValue(1)
-isInputPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(260, 150))
 isInputTime = wx.RadioButton(frame,label = 'sekundes',pos=(360, 150), style=wx.RB_GROUP)
+isInputPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(260, 150))
 isInputPoint.SetValue(1)
 inputFrame = wx.TextCtrl(frame,-1,pos=(200, 180), size=(50, 20), value=('1024'))
 inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(200, 210), size=(50, 20), value=('40'))
@@ -721,8 +721,8 @@ inputHanningAllow = wx.CheckBox(frame,-1,pos=(235, 330), size=(50, 20))
 inputCoorelLength = wx.TextCtrl(frame,-1,pos=(200, 360), size=(50, 20), value=('25'))
 inputMaxTreshold = wx.TextCtrl(frame,-1,pos=(200, 390), size=(50, 20), value=('500'))
 
-inputOffsetSignal1 = wx.TextCtrl(frame,-1,pos=(320, 60), size=(50, 20), value=('0'))
-inputOffsetSignal2 = wx.TextCtrl(frame,-1,pos=(320, 90), size=(50, 20), value=('0'))
+inputColumnSignal1 = wx.TextCtrl(frame,-1,pos=(320, 60), size=(50, 20), value=('3'))
+inputColumnSignal2 = wx.TextCtrl(frame,-1,pos=(320, 90), size=(50, 20), value=('3'))
 inputHanningAllow.SetValue(0)
 
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
@@ -743,8 +743,8 @@ label4 = wx.StaticText(frame, -1,'Haningo langas pirminiui signalui', pos=(15, 3
 label15 = wx.StaticText(frame, -1,'Koreliacijos ilgis (%)', pos=(15, 360))
 label16 = wx.StaticText(frame, -1,'Maksimumu nuolydis (Hz)', pos=(15, 390))
 label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 470))
-label17 = wx.StaticText(frame, -1,"poslinkis", pos=(380, 60))
-label18 = wx.StaticText(frame, -1,"poslinkis", pos=(380, 90))
+label17 = wx.StaticText(frame, -1,"stulpelis", pos=(380, 60))
+label18 = wx.StaticText(frame, -1,"stulpelis", pos=(380, 90))
 label12.SetForegroundColour(wx.Colour(173,88,88));
 
 button.Bind(wx.EVT_BUTTON, execCalc)
