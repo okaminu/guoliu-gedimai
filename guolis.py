@@ -359,7 +359,7 @@ class Signal:
         file = open(self.rmsLocation+fileName+".txt", 'w')
         file.writelines("Originalus: "+ self._rmsOriginal() +"\n")
         file.writelines("Centruotas: "+ self._rmsCleaned() +"\n")
-        file.writelines("Originalo vidurkintas: "+ self._rmsMean +"\n")
+        file.writelines("Originalo vidurkintas: "+ self._rmsMeanF() +"\n")
         file.writelines("Centruoto vidurkintas: "+ self._rmsCleanedSF() +"\n")
 
     def saveMaxFrequencyDistance(self, signalName):
