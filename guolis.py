@@ -340,16 +340,15 @@ class Signal:
 
     def _rmsCleanedSF (self):
         sum = 0
-        number = 0
-        kiekN = 0
-        cleanTFData = self._cleanTimeFrame
-        for itera in range (len(cleanTFData)):
-            sum += (cleanTFData[itera]*(math.sin(2*3.14*50*0.02)))
-            if itera % 1024 == 0:
-                number += sum ** 2
-                kiekN+=1
-                sum = 0
-        return str((number / kiekN) ** (1.0/2))
+
+        cleanTimeFrame = self._cleanTimeFrame
+
+        for itera in range (len(cleanTimeFrame)):
+            sum += ( math.pow(cleanTimeFrame[itera], 2))
+
+        aver = sum / len(cleanTimeFrame)
+
+        return str(math.sqrt(aver))
 
     def _saveRMS(self, fileName):
 
