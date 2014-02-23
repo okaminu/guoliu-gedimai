@@ -446,8 +446,8 @@ class Signal:
 
             #Max display
             #freqMax = self.twoMax(data[iter]['values'])
-            #plt.bar(freqMax['firstIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
-            #plt.bar(freqMax['secondIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
+            plt.bar(freqMax['firstIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
+            plt.bar(freqMax['secondIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
 
             plt.plot(range(0, int(Lenght)), data[iter]['values'], displayParams)
             plt.title(data[iter]['title'])
