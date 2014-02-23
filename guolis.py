@@ -673,7 +673,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai v0.8.7'
+appTitle = 'Guoliu Gedimai v0.8.8'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
