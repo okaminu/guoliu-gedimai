@@ -689,7 +689,7 @@ isInputTime = wx.RadioButton(frame,label = 'sekundes',pos=(360, 180), style=wx.R
 isInputPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(260, 180))
 isInputPoint.SetValue(1)
 inputFrame = wx.TextCtrl(frame,-1,pos=(200, 210), size=(50, 20), value=('1024'))
-inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(200, 240), size=(50, 20), value=('40'))
+inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(200, 240), size=(50, 20), value=('33'))
 inputFreMark = wx.TextCtrl(frame,-1,pos=(200, 270), size=(50, 20), value=('0'))
 inputHideFreq = wx.TextCtrl(frame,-1,pos=(200, 300), size=(50, 20), value=('0'))
 inputHanningSize = wx.TextCtrl(frame,-1,pos=(200, 330), size=(50, 20), value=('0'))
