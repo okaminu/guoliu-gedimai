@@ -306,49 +306,24 @@ class Signal:
         cepstrum = np.fft.ifft(map(exp, np.fft.fft(cepstrum)))
         return map(lambda x: x.real, cepstrum[0:convolution_size])
 
-    def _rmsOriginal (self):
-        sum = 0
-        originalData = self._originalData
-        for itera in range (len(originalData)):
-            sum += ( math.pow(originalData[itera], 2))
-        aver = sum / len(originalData)
-
+    def _calcRms(self, data):
+        sum=0
+        for itera in range(len(data)):
+            sum += math.pow(data[itera] * math.sin((2 * 3.14) * (50 * 0.0333)), 2)
+        aver = sum / len(data)
         return str(math.sqrt(aver))
+
+    def _rmsOriginal (self):
+        return self._calcRms(self._originalData)
 
     def _rmsCleaned (self):
-        sum = 0
-
-        cleanData = self._cleanData
-        for itera in range (len(cleanData)):
-            sum += ( math.pow(cleanData[itera], 2))
-
-        aver = sum / len(cleanData)
-
-        return str(math.sqrt(aver))
+        return self._calcRms(self._cleanData)
 
     def _rmsMeanF (self):
-        sum = 0
-
-        meanData = self._meanFrame
-
-        for itera in range (len(meanData)):
-            sum += ( math.pow(meanData[itera], 2))
-
-        aver = sum / len(meanData)
-
-        return str(math.sqrt(aver))
+        return self._calcRms(self._meanFrame)
 
     def _rmsCleanedSF (self):
-        sum = 0
-
-        cleanTimeFrame = self._cleanTimeFrame
-
-        for itera in range (len(cleanTimeFrame)):
-            sum += ( math.pow(cleanTimeFrame[itera], 2))
-
-        aver = sum / len(cleanTimeFrame)
-
-        return str(math.sqrt(aver))
+        return self._calcRms(self._cleanTimeFrame)
 
     def _saveRMS(self, fileName):
 
@@ -470,9 +445,9 @@ class Signal:
             plt.bar(localFreMark, max(data[iter]['values']), width=0.8, edgecolor = '#CCCCCC')
 
             #Max display
-            freqMax = self.twoMax(data[iter]['values'])
-            plt.bar(freqMax['firstIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
-            plt.bar(freqMax['secondIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
+            #freqMax = self.twoMax(data[iter]['values'])
+            #plt.bar(freqMax['firstIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
+            #plt.bar(freqMax['secondIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
 
             plt.plot(range(0, int(Lenght)), data[iter]['values'], displayParams)
             plt.title(data[iter]['title'])
