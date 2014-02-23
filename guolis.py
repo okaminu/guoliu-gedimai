@@ -9,11 +9,22 @@ import os
 
 # Vytauto testas
 #import threading
+class SignalParameters:
+
+    FirstSignalColor = 'g'
+    SecondSignalColor = 'b'
+    DifferenceSignalColor = 'r'
+
+    FirstSignalName = 'Pirmas'
+    SecondSignalName = 'Antras'
+    DifferenceSignalName = 'Skirtumas'
+
 
 class Signal:
 
     signalNames = []
     signalData = []
+
 
     def initValues(self):
         self._fileCol = 0
@@ -445,7 +456,7 @@ class Signal:
             plt.bar(localFreMark, max(data[iter]['values']), width=0.8, edgecolor = '#CCCCCC')
 
             #Max display
-            #freqMax = self.twoMax(data[iter]['values'])
+            freqMax = self.twoMax(data[iter]['values'])
             plt.bar(freqMax['firstIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
             plt.bar(freqMax['secondIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
 
@@ -649,23 +660,23 @@ def execCalc(event):
             inputIsHalfRoll.GetValue()
         )
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
-        signal1.addToLegend('Pirmas', 'g')
-        signal1.addToLegend('Antras', 'b')
-        signal1.addToLegend('Skirtumas', 'r')
+        signal1.addToLegend(SignalParameters().FirstSignalName, SignalParameters().FirstSignalColor)
+        signal1.addToLegend(SignalParameters().SecondSignalName, SignalParameters().SecondSignalColor)
+        signal1.addToLegend(SignalParameters().DifferenceSignalName, SignalParameters().DifferenceSignalColor)
         signalDiff = copy.deepcopy(signal1)
         signalDiff.substractFrom(signal2)
         signalDiff.calcCorrelation(signalDiff)
-        signalDiff.displayAllData('r', 'Skirtumas', 1)
-        signal2.displayAllData('b', 'Antras')
-        signal2.saveMaxFrequencyDistance('Antras')
+        signalDiff.displayAllData(SignalParameters().DifferenceSignalColor, SignalParameters().DifferenceSignalName, 1)
+        signal2.displayAllData(SignalParameters().SecondSignalColor, SignalParameters().SecondSignalName)
+        signal2.saveMaxFrequencyDistance(SignalParameters().SecondSignalName)
         corrSignal = copy.deepcopy(signal2)
         del signalDiff
         del signal2
 
     signal1.calcCorrelation(corrSignal)
     signal1.setDrawLegend(1)
-    signal1.displayAllData('g', 'Pirmas', 1)
-    signal1.saveMaxFrequencyDistance('Pirmas');
+    signal1.displayAllData(SignalParameters().FirstSignalColor, SignalParameters().FirstSignalName, 1)
+    signal1.saveMaxFrequencyDistance(SignalParameters().FirstSignalName);
     del signal1
     Signal.clearClassVariables()
     # Draw the plot to the screen
