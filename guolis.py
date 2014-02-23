@@ -11,9 +11,9 @@ import os
 #import threading
 class SignalParameters:
 
-    FirstSignalColor = 'g'
-    SecondSignalColor = 'b'
-    DifferenceSignalColor = 'r'
+    FirstSignalColor = '#ff8000'
+    SecondSignalColor = '#00c800'
+    DifferenceSignalColor = '#8000ff'
 
     FirstSignalName = 'Pirmas'
     SecondSignalName = 'Antras'
