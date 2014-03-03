@@ -79,7 +79,7 @@ class Signal:
         self._meanFrameCeps = []
         self._cleanTimeFrameCeps = []
 
-    def __init__(self, range, frameSize, skip, freMark, singleRollTime, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100, fileCol = 0, isHalfRoll = 0):
+    def __init__(self, range, frameSize, skip, freMark, rpm, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100, fileCol = 0, isHalfRoll = 0):
         self._hideFreq = int(hideFreq)
         self.initValues()
         self._fileCol = int(fileCol)
@@ -87,7 +87,7 @@ class Signal:
         self._coorLength = float(coorLength) /100
         self._hanningAllow = int(allowHanning)
         self._hanningWindowSize = int(hannSize)
-        self._SingleRollTime = int(singleRollTime)
+        self._SingleRollTime = int(1/float(1800/60)*1000)
         self._rolls = int(range)
         if(isRangeTime == 1):
             self._rolls = self.convertTimeToRolls(range)
@@ -627,7 +627,7 @@ def execCalc(event):
         inputFrame.GetValue(),
         inputSkip.GetValue(),
         inputFreMark.GetValue(),
-        inputSingleRollTime.GetValue(),
+        inputRPM.GetValue(),
         rangeTime,
         skipTime,
         inputHideFreq.GetValue(),
@@ -648,7 +648,7 @@ def execCalc(event):
             inputFrame.GetValue(),
             inputSkip.GetValue(),
             inputFreMark.GetValue(),
-            inputSingleRollTime.GetValue(),
+            inputRPM.GetValue(),
             rangeTime,
             skipTime,
             inputHideFreq.GetValue(),
@@ -659,6 +659,7 @@ def execCalc(event):
             inputColumnSignal2.GetValue(),
             inputIsHalfRoll.GetValue()
         )
+
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
         signal1.addToLegend(SignalParameters().FirstSignalName, SignalParameters().FirstSignalColor)
         signal1.addToLegend(SignalParameters().SecondSignalName, SignalParameters().SecondSignalColor)
@@ -684,7 +685,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai v0.8.8'
+appTitle = 'Guoliu Gedimai v0.8.9'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
@@ -700,7 +701,7 @@ isInputTime = wx.RadioButton(frame,label = 'sekundes',pos=(360, 180), style=wx.R
 isInputPoint = wx.RadioButton(frame,label = 'apsisukimai',pos=(260, 180))
 isInputPoint.SetValue(1)
 inputFrame = wx.TextCtrl(frame,-1,pos=(200, 210), size=(50, 20), value=('1024'))
-inputSingleRollTime = wx.TextCtrl(frame,-1,pos=(200, 240), size=(50, 20), value=('33'))
+inputRPM = wx.TextCtrl(frame,-1,pos=(200, 240), size=(50, 20), value=('1800'))
 inputFreMark = wx.TextCtrl(frame,-1,pos=(200, 270), size=(50, 20), value=('0'))
 inputHideFreq = wx.TextCtrl(frame,-1,pos=(200, 300), size=(50, 20), value=('0'))
 inputHanningSize = wx.TextCtrl(frame,-1,pos=(200, 330), size=(50, 20), value=('0'))
@@ -725,7 +726,7 @@ label19 = wx.StaticText(frame, -1,"Ivertinti ritinio vieta", pos=(15, 120))
 label5 = wx.StaticText(frame, -1, 'Praleisti' , pos=(15, 150))
 label9 = wx.StaticText(frame, -1, 'Imtis' , pos=(15, 180))
 label3 = wx.StaticText(frame, -1, 'Tasku kiekis apsisukime' , pos=(15, 210))
-label14 = wx.StaticText(frame, -1,'Apsisukimo trukme (ms)' , pos=(15, 240))
+label14 = wx.StaticText(frame, -1,'Veleno greitis (RPM)' , pos=(15, 240))
 label13 = wx.StaticText(frame, -1,'Rezonansas (Hz)', pos=(15, 270))
 label2 = wx.StaticText(frame, -1,'Slept pirmus daznius (Hz)', pos=(15, 300))
 label4 = wx.StaticText(frame, -1,'Haningo lango dydis (Hz)', pos=(15, 330))
