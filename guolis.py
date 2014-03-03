@@ -622,22 +622,22 @@ def execCalc(event):
         rangeTime = 0
     if((isSkipTime.GetValue() == 0) and (isSkipPoint.GetValue() == 1)):
         skipTime = 0
-    signal1 = Signal(
-        inputRange.GetValue(),
-        inputFrame.GetValue(),
-        inputSkip.GetValue(),
-        inputFreMark.GetValue(),
-        inputRPM.GetValue(),
-        rangeTime,
-        skipTime,
-        inputHideFreq.GetValue(),
-        inputHanningSize.GetValue(),
-        inputHanningAllow.GetValue(),
-        inputCoorelLength.GetValue(),
-        inputMaxTreshold.GetValue(),
-        inputColumnSignal1.GetValue(),
-        0
-    )
+        signal1 = Signal(
+            inputRange.GetValue(),
+            inputFrame.GetValue(),
+            inputSkip.GetValue(),
+            inputFreMark.GetValue(),
+            inputRPM.GetValue(),
+            rangeTime,
+            skipTime,
+            inputHideFreq.GetValue(),
+            inputHanningSize.GetValue(),
+            inputHanningAllow.GetValue(),
+            inputCoorelLength.GetValue(),
+            inputMaxTreshold.GetValue(),
+            inputColumnSignal1.GetValue(),
+            0
+        )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
 
