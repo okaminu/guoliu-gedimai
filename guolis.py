@@ -43,8 +43,10 @@ class Signal:
         self._proportion = 9.81
         self._displayParams = 'g'
         self._originalData = []
+        self._originalRMSData = []
         self._originalDataFreq = []
         self._cleanData = []
+        self._cleanRMSData = []
         self._cleanDataFreq = []
         self._meanFrame = []
         self._meanFrameFreq = []
@@ -336,6 +338,19 @@ class Signal:
     def _rmsCleanedSF (self):
         return self._calcRms(self._cleanTimeFrame)
 
+    def calcRmsForEachRoll(self, signal):
+        rmsInterval = []
+        for itera in range(len(signal)):
+            if ((itera % self._frameSize) == 0) and (itera != 0):
+                sliceOfData = signal[itera - self._frameSize:itera]
+                rms = self._calcRms(sliceOfData)
+                rmsInterval.append(rms)
+        return rmsInterval
+
+    def _calcRMSForTime(self):
+        self._originalRMSData = self.calcRmsForEachRoll(self._originalData)
+        self._cleanRMSData = self.calcRmsForEachRoll(self._cleanData)
+
     def _saveRMS(self, fileName):
 
         if(os.path.exists(self.rmsLocation) == 0):
@@ -499,11 +514,15 @@ class Signal:
 
     def displayAllTime(self, displayParams):
         originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'}
-        cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'}
-        self._displayTime({0:originalDisplay, 1: cleanDisplay}, displayParams, 's', 0)
+        originalRMSDisplay = {'values' : self._originalRMSData, 'title' : 'Originalus (Laikas) RMS'}
+        self._displayTime({0:originalDisplay, 1: originalRMSDisplay}, displayParams, 's', 0)
 
-        meanDisplay = {'values' : self._meanFrame, 'title' : 'Originalo vidurkis (Laikas)'}
-        cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Centruoto vidurkis (Laikas)'}
+        cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'}
+        cleanRMSDisplay = {'values' : self._cleanRMSData, 'title' : 'Centruotas (Laikas) RMS'}
+        self._displayTime({0:cleanDisplay, 1: cleanRMSDisplay}, displayParams, 's', 0)
+
+        meanDisplay = {'values' : self._meanFrame, 'title' : 'Originalo vidurkis (Laikas), RMS = '+ self._rmsMeanF()}
+        cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Centruoto vidurkis (Laikas), RMS = '+ self._rmsCleanedSF()}
         self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, displayParams,'ms', 0)
 
 
@@ -612,6 +631,7 @@ class Signal:
         self._calcFreqSpectrums()
         self._calcCepstrums()
         self._calcHanningWindow()
+        self._calcRMSForTime()
 
 def execCalc(event):
 
@@ -685,7 +705,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai v0.8.9'
+appTitle = 'Guoliu Gedimai v0.9'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
