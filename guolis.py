@@ -24,7 +24,7 @@ class Signal:
 
     signalNames = []
     signalData = []
-
+    _lastTimeFigure = 0
 
     def initValues(self):
         self._fileCol = 0
@@ -206,7 +206,7 @@ class Signal:
     def calculateHanningWindow(self, count):
         result= []
         for i in range(0, count, 1):
-                result.append(0.5 * (1- np.cos(((2*3.14)*i)/count)))
+            result.append(0.5 * (1- np.cos(((2*3.14)*i)/count)))
         return np.array(result)
 
     def filterHanningWindowFrame(self, signal):
@@ -300,7 +300,7 @@ class Signal:
         table = signal
         pad_size = 0
         table = list(table)
-            # table should be a real-valued table of FIR coefficients
+        # table should be a real-valued table of FIR coefficients
         convolution_size = len(table)
         table += [0] * (convolution_size * (pad_size - 1))
 
@@ -418,8 +418,15 @@ class Signal:
             file.writelines(str(data['values'][iter]) +"\n")
 
     def _displayTime(self, data, displayParams, marking = 's', grid = 1):
-        self._lastFigure+=1
-        plt.figure(self._lastFigure)
+        Signal._lastTimeFigure+=1
+        self._drawDisplayTime(data, displayParams, Signal._lastTimeFigure, marking, grid)
+
+    def _displayCepst(self, data, displayParams, marking = 's', grid = 1):
+        self._lastFigure +=1
+        self._drawDisplayTime(data, displayParams, self._lastFigure, marking, grid)
+
+    def _drawDisplayTime(self, data, displayParams, figure, marking = 's', grid = 1):
+        plt.figure(figure)
         subplots = 211
         for iter in range(len(data)):
             if(len(data) > 1):
@@ -452,8 +459,7 @@ class Signal:
                     height = abs(max(data[iter]['values'])) + abs(min(data[iter]['values']))
                     plt.bar(gridMark[i], height, width=1, edgecolor = '#000000', bottom= min(data[iter]['values']))
         if(self.isDrawLegend == 1):
-                self.drawLegend()
-
+            self.drawLegend()
 
     def _displayFreq(self, data, displayParams):
         self._lastFigure +=1
@@ -542,11 +548,11 @@ class Signal:
     def displayAllCepstrums(self, displayParams):
         originalCepstDisplay = {'values' : self._originalDataCeps, 'title' : 'Originalus (Laikas) Kepstras'}
         cleanCepstDisplay = {'values' : self._cleanDataCeps, 'title' : 'Centruotas (Laikas) Kepstras'}
-        self._displayTime({0:originalCepstDisplay, 1: cleanCepstDisplay}, displayParams, 's', 0)
+        self._displayCepst({0:originalCepstDisplay, 1: cleanCepstDisplay}, displayParams, 's', 0)
 
         meanCepstDisplay = {'values' : self._meanFrameCeps, 'title' : 'Originalo vidurkis (Laikas) Kepstras'}
         cleanFrameCepstDisplay = {'values' : self._cleanTimeFrameCeps, 'title' : 'Centruoto vidurkis (Laikas) Kepstras'}
-        self._displayTime({0:meanCepstDisplay, 1: cleanFrameCepstDisplay}, displayParams,'ms', 0)
+        self._displayCepst({0:meanCepstDisplay, 1: cleanFrameCepstDisplay}, displayParams,'ms', 0)
 
     def displayAllCorrelations(self, displayParams):
         originalCorrDisplay = {'values' : self._originalDataCorr, 'title' : 'Originalus (Laikas) Koreliacija'}
@@ -572,8 +578,8 @@ class Signal:
         self._saveRMS(signalName)
 
         displayParams = color;
-
-        self.displayAllTime(displayParams)
+        self._lastFigure = Signal._lastTimeFigure
+        # self.displayAllTime(displayParams)
 
         self.displayAllFreq(displayParams)
 
@@ -582,7 +588,7 @@ class Signal:
         if(isCorr == 1):
             self.displayAllCorrelations(displayParams)
 
-        self._lastFigure = 0
+        self._lastFigure = Signal._lastTimeFigure
 
     def substract(self, num1, num2):
         return abs(abs(num1) - abs(num2))
@@ -661,6 +667,8 @@ def execCalc(event):
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
 
+    signal1.setDrawLegend(1)
+    signal1.displayAllTime(SignalParameters().FirstSignalColor)
     corrSignal = signal1
     if(inputFile2.GetValue() != ''):
         signal2 = Signal(
@@ -687,6 +695,13 @@ def execCalc(event):
         signalDiff = copy.deepcopy(signal1)
         signalDiff.substractFrom(signal2)
         signalDiff.calcCorrelation(signalDiff)
+        signalDiff._calcRMSForTime()
+
+        signal2.setDrawLegend(1)
+        signalDiff.setDrawLegend(1)
+        signal2.displayAllTime(SignalParameters().SecondSignalColor)
+        signalDiff.displayAllTime(SignalParameters().DifferenceSignalColor)
+
         signalDiff.displayAllData(SignalParameters().DifferenceSignalColor, SignalParameters().DifferenceSignalName, 1)
         signal2.displayAllData(SignalParameters().SecondSignalColor, SignalParameters().SecondSignalName)
         signal2.saveMaxFrequencyDistance(SignalParameters().SecondSignalName)
@@ -695,7 +710,6 @@ def execCalc(event):
         del signal2
 
     signal1.calcCorrelation(corrSignal)
-    signal1.setDrawLegend(1)
     signal1.displayAllData(SignalParameters().FirstSignalColor, SignalParameters().FirstSignalName, 1)
     signal1.saveMaxFrequencyDistance(SignalParameters().FirstSignalName);
     del signal1
@@ -705,7 +719,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai v0.9'
+appTitle = 'Guoliu Gedimai v0.9.2'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
