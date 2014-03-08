@@ -319,6 +319,20 @@ class Signal:
         cepstrum = np.fft.ifft(map(exp, np.fft.fft(cepstrum)))
         return map(lambda x: x.real, cepstrum[0:convolution_size])
 
+    def _calcDispersion(self, data):
+        disp = 0
+        temp = []
+
+        for y in data:
+            temp.append(float(y))
+
+        mean = np.mean(temp)
+        for x in temp:
+            disp = disp + np.power(x - mean, 2)
+        return disp / len(temp)
+
+
+
     def _calcRms(self, data):
         sum=0
         for itera in range(len(data)):
@@ -520,11 +534,13 @@ class Signal:
 
     def displayAllTime(self, displayParams):
         originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'}
-        originalRMSDisplay = {'values' : self._originalRMSData, 'title' : 'Originalus (Laikas) RMS'}
+        originalRMSDisplay = {'values' : self._originalRMSData,
+                              'title' : 'Originalus (Laikas) RMS, Dispersija = '+ str(self._calcDispersion(self._originalRMSData))}
         self._displayTime({0:originalDisplay, 1: originalRMSDisplay}, displayParams, 's', 0)
 
         cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'}
-        cleanRMSDisplay = {'values' : self._cleanRMSData, 'title' : 'Centruotas (Laikas) RMS'}
+        cleanRMSDisplay = {'values' : self._cleanRMSData,
+                           'title' : 'Centruotas (Laikas) RMS, Dispersija = '+ str(self._calcDispersion(self._cleanRMSData))}
         self._displayTime({0:cleanDisplay, 1: cleanRMSDisplay}, displayParams, 's', 0)
 
         meanDisplay = {'values' : self._meanFrame, 'title' : 'Originalo vidurkis (Laikas), RMS = '+ self._rmsMeanF()}
