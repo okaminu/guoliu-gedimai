@@ -431,11 +431,11 @@ class Signal:
         for iter in range(len(data['values'])):
             file.writelines(str(data['values'][iter]) +"\n")
 
-    def _displayTime(self, data, displayParams, marking = 's', grid = 1):
+    def _displayTime(self, data, displayParams, marking , grid):
         Signal._lastTimeFigure+=1
         self._drawDisplayTime(data, displayParams, Signal._lastTimeFigure, marking, grid, 1)
 
-    def _displayCepst(self, data, displayParams, marking = 's', grid = 1):
+    def _displayCepst(self, data, displayParams, marking , grid):
         self._lastFigure +=1
         self._drawDisplayTime(data, displayParams, self._lastFigure, marking, grid)
 
