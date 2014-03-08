@@ -433,15 +433,16 @@ class Signal:
 
     def _displayTime(self, data, displayParams, marking = 's', grid = 1):
         Signal._lastTimeFigure+=1
-        self._drawDisplayTime(data, displayParams, Signal._lastTimeFigure, marking, grid)
+        self._drawDisplayTime(data, displayParams, Signal._lastTimeFigure, marking, grid, 1)
 
     def _displayCepst(self, data, displayParams, marking = 's', grid = 1):
         self._lastFigure +=1
         self._drawDisplayTime(data, displayParams, self._lastFigure, marking, grid)
 
-    def _drawDisplayTime(self, data, displayParams, figure, marking = 's', grid = 1):
+    def _drawDisplayTime(self, data, displayParams, figure, marking = 's', grid = 1, preserveFirstXAxis = 0):
         plt.figure(figure)
         subplots = 211
+        xAxisMarkerValues = []
         for iter in range(len(data)):
             if(len(data) > 1):
                 plt.subplot(subplots)
@@ -450,18 +451,20 @@ class Signal:
             subplots+=1
 
             Lenght = float(len(data[iter]['values']))
-            xAxisMarkerValues = []
+
             xAxisMarkerPlacement = [Lenght * 0, Lenght * 0.2, Lenght * 0.4, Lenght * 0.6, Lenght * 0.8, Lenght * 1]
-            for marker in range(len(xAxisMarkerPlacement)):
-                rolls = self.convertPointsToRolls(xAxisMarkerPlacement[marker])
-                if(marking == 's'):
-                    time = round(float(self.convertRollsToTime(rolls)), 2)
-                elif(marking == 'ms'):
-                    time = round(self.convertRollsToTime(rolls),2)
-                xAxisMarkerValues.append(time)
 
+            if preserveFirstXAxis == 0 or len(xAxisMarkerValues) == 0:
+                xAxisMarkerValues = []
+                for marker in range(len(xAxisMarkerPlacement)):
+                    rolls = self.convertPointsToRolls(xAxisMarkerPlacement[marker])
+                    if(marking == 's'):
+                        time = round(float(self.convertRollsToTime(rolls)), 2)
+                    elif(marking == 'ms'):
+                        time = round(self.convertRollsToTime(rolls),2)
+                    xAxisMarkerValues.append(time)
+                xAxisMarkerValues[len(xAxisMarkerValues) -1] = str(xAxisMarkerValues[len(xAxisMarkerValues) -1]) + " s"
 
-            xAxisMarkerValues[len(xAxisMarkerValues) -1] = str(xAxisMarkerValues[len(xAxisMarkerValues) -1]) + " s"
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
 
             Lenght = float(len(data[iter]['values']))
@@ -735,7 +738,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai v0.9.2'
+appTitle = 'Guoliu Gedimai v1.0'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
