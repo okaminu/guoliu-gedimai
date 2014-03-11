@@ -610,7 +610,7 @@ class Signal:
         self._lastFigure = Signal._lastTimeFigure
 
     def substract(self, num1, num2):
-        return abs(abs(num1) - abs(num2))
+        return abs(num1) - abs(num2)
 
     def _substractSignals(self, signal2):
         leng = min({len(signal2._originalData), len(self._originalData)})
