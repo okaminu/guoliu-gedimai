@@ -431,9 +431,9 @@ class Signal:
         for iter in range(len(data['values'])):
             file.writelines(str(data['values'][iter]) +"\n")
 
-    def _displayTime(self, data, displayParams, marking , grid):
+    def _displayTime(self, data, displayParams, marking , grid, persist):
         Signal._lastTimeFigure+=1
-        self._drawDisplayTime(data, displayParams, Signal._lastTimeFigure, marking, grid, 1)
+        self._drawDisplayTime(data, displayParams, Signal._lastTimeFigure, marking, grid, persist)
 
     def _displayCepst(self, data, displayParams, marking , grid):
         self._lastFigure +=1
@@ -452,6 +452,7 @@ class Signal:
 
             Lenght = float(len(data[iter]['values']))
 
+
             xAxisMarkerPlacement = [Lenght * 0, Lenght * 0.2, Lenght * 0.4, Lenght * 0.6, Lenght * 0.8, Lenght * 1]
 
             if preserveFirstXAxis == 0 or len(xAxisMarkerValues) == 0:
@@ -464,6 +465,11 @@ class Signal:
                         time = round(self.convertRollsToTime(rolls),2)
                     xAxisMarkerValues.append(time)
                 xAxisMarkerValues[len(xAxisMarkerValues) -1] = str(xAxisMarkerValues[len(xAxisMarkerValues) -1]) + " s"
+            else:
+                size = float(max(data[iter]['values'])) - float(min(data[iter]['values']))
+                average = sum(float(value) for value in data[iter]['values'])/len(data[iter]['values']);
+                plt.barh(average,Lenght, align='center', height=0.1*size)
+
 
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
 
@@ -539,16 +545,16 @@ class Signal:
         originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'}
         originalRMSDisplay = {'values' : self._originalRMSData,
                               'title' : 'Originalus (Laikas) RMS, Dispersija = '+ str(self._calcDispersion(self._originalRMSData))}
-        self._displayTime({0:originalDisplay, 1: originalRMSDisplay}, displayParams, 's', 0)
+        self._displayTime({0:originalDisplay, 1: originalRMSDisplay}, displayParams, 's', 0, 1)
 
         cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'}
         cleanRMSDisplay = {'values' : self._cleanRMSData,
                            'title' : 'Centruotas (Laikas) RMS, Dispersija = '+ str(self._calcDispersion(self._cleanRMSData))}
-        self._displayTime({0:cleanDisplay, 1: cleanRMSDisplay}, displayParams, 's', 0)
+        self._displayTime({0:cleanDisplay, 1: cleanRMSDisplay}, displayParams, 's', 0, 1)
 
         meanDisplay = {'values' : self._meanFrame, 'title' : 'Originalo vidurkis (Laikas), RMS = '+ self._rmsMeanF()}
         cleanFrameDisplay = {'values' : self._cleanTimeFrame, 'title' : 'Centruoto vidurkis (Laikas), RMS = '+ self._rmsCleanedSF()}
-        self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, displayParams,'ms', 0)
+        self._displayTime({0:meanDisplay, 1: cleanFrameDisplay}, displayParams,'ms', 0, 0)
 
 
     def displayAllFreq(self, displayParams):
@@ -738,7 +744,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai 1.0'
+appTitle = 'Guoliu Gedimai 1.0.1'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
