@@ -80,6 +80,7 @@ class Signal:
         self._cleanDataCeps = []
         self._meanFrameCeps = []
         self._cleanTimeFrameCeps = []
+        self._exportImages = 0
 
     def __init__(self, range, frameSize, skip, freMark, rpm, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100, fileCol = 0, isHalfRoll = 0):
         self._hideFreq = int(hideFreq)
@@ -147,7 +148,7 @@ class Signal:
         bufIter = 0
         frameSize = self._frameSize
         originalData = self._originalData
-        size = len(originalData)-frameSize
+        size = len(originalData)
         if(size == 0):
             size = self._frameSize
 
@@ -166,7 +167,7 @@ class Signal:
         bufIter = 0
         originalData = self._originalData
         frameSize = self._frameSize
-        size = (len(originalData)-frameSize)
+        size = len(originalData)
         meanFrame = self._meanFrame
         if(size == 0):
             size = self._frameSize
@@ -355,8 +356,8 @@ class Signal:
     def calcRmsForEachRoll(self, signal):
         rmsInterval = []
         for itera in range(len(signal)):
-            if ((itera % self._frameSize) == 0) and (itera != 0):
-                sliceOfData = signal[itera - self._frameSize:itera]
+            if (((itera+1) % self._frameSize) == 0) and (itera != 0):
+                sliceOfData = signal[((itera+1) - self._frameSize):itera+1]
                 rms = self._calcRms(sliceOfData)
                 rmsInterval.append(rms)
         return rmsInterval
@@ -472,13 +473,17 @@ class Signal:
                 plt.barh(average,Lenght, align='center', height=0.0113*size, linewidth = 0)
                 markerSimbol = 'o'
                 lineStyle = 'None'
+                data[iter]['values'].insert(0, 0)
 
             plt.plot(range(0, len(data[iter]['values'])), data[iter]['values'], displayParams, marker = markerSimbol, linestyle = lineStyle)
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
 
             Lenght = float(len(data[iter]['values']))
 
-            if(grid==1):
+        if self._exportImages == 1:
+            plt.savefig('image/'+str(figure)+' - '+ data[iter]['title']+'.png')
+
+        if(grid==1):
                 gridPart = (Lenght/8)
                 gridMark = [gridPart * 1, gridPart * 2, gridPart * 3, gridPart * 4, gridPart * 5, gridPart * 6, gridPart * 7, gridPart * 8]
                 for i in range(len(gridMark)):
@@ -513,6 +518,9 @@ class Signal:
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
             subplots+=1
 
+        if self._exportImages == 1:
+            plt.savefig('image/'+str(self._lastFigure)+' - '+ data[iter]['title']+'.png')
+
         if(self.isDrawLegend == 1):
             self.drawLegend()
 
@@ -527,6 +535,8 @@ class Signal:
             plt.title(data[iter]['title'])
             subplots+=1
 
+        if self._exportImages == 1:
+            plt.savefig('image/'+str(self._lastFigure)+' - '+ data[iter]['title']+'.png')
 
         if(self.isDrawLegend == 1):
             self.drawLegend()
@@ -747,7 +757,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai 1.1'
+appTitle = 'Guoliu Gedimai 1.1.1'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
