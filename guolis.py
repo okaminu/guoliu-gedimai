@@ -446,15 +446,16 @@ class Signal:
         for iter in range(len(data)):
             if(len(data) > 1):
                 plt.subplot(subplots)
-            plt.plot(range(0, len(data[iter]['values'])), data[iter]['values'], displayParams)
-            plt.title(data[iter]['title'])
+
             subplots+=1
 
+            plt.title(data[iter]['title'])
+
             Lenght = float(len(data[iter]['values']))
-
-
             xAxisMarkerPlacement = [Lenght * 0, Lenght * 0.2, Lenght * 0.4, Lenght * 0.6, Lenght * 0.8, Lenght * 1]
 
+            markerSimbol = ' '
+            lineStyle = '-'
             if preserveFirstXAxis == 0 or len(xAxisMarkerValues) == 0:
                 xAxisMarkerValues = []
                 for marker in range(len(xAxisMarkerPlacement)):
@@ -468,9 +469,11 @@ class Signal:
             else:
                 size = float(max(data[iter]['values'])) - float(min(data[iter]['values']))
                 average = sum(float(value) for value in data[iter]['values'])/len(data[iter]['values']);
-                plt.barh(average,Lenght, align='center', height=0.1*size)
+                plt.barh(average,Lenght, align='center', height=0.0113*size, linewidth = 0)
+                markerSimbol = 'o'
+                lineStyle = 'None'
 
-
+            plt.plot(range(0, len(data[iter]['values'])), data[iter]['values'], displayParams, marker = markerSimbol, linestyle = lineStyle)
             plt.xticks(xAxisMarkerPlacement, xAxisMarkerValues, ha='center')
 
             Lenght = float(len(data[iter]['values']))
@@ -501,8 +504,8 @@ class Signal:
 
             #Max display
             freqMax = self.twoMax(data[iter]['values'])
-            plt.bar(freqMax['firstIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
-            plt.bar(freqMax['secondIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
+            # plt.bar(freqMax['firstIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
+            # plt.bar(freqMax['secondIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
 
             plt.plot(range(0, int(Lenght)), data[iter]['values'], displayParams)
             plt.title(data[iter]['title'])
@@ -602,7 +605,7 @@ class Signal:
     def displayAllData(self, color, signalName, isCorr = 0):
         self._saveRMS(signalName)
 
-        displayParams = color;
+        displayParams = color
         self._lastFigure = Signal._lastTimeFigure
         # self.displayAllTime(displayParams)
 
@@ -744,7 +747,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai 1.0.1'
+appTitle = 'Guoliu Gedimai 1.1'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
@@ -777,8 +780,8 @@ inputHanningAllow.SetValue(0)
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
 font = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 label0.SetFont(font)
-label0.SetForegroundColour(wx.Colour(14,181,56));
-frame.SetBackgroundColour(wx.Colour(225,225,225));
+label0.SetForegroundColour(wx.Colour(14,181,56))
+frame.SetBackgroundColour(wx.Colour(225,225,225))
 label1 = wx.StaticText(frame, -1, 'Pirmas matavimu failas' , pos=(15, 60))
 label6 = wx.StaticText(frame, -1, 'Antras matavimu failas' , pos=(15, 90))
 label19 = wx.StaticText(frame, -1,"Ivertinti ritinio vieta", pos=(15, 120))
