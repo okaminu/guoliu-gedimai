@@ -468,9 +468,9 @@ class Signal:
                     xAxisMarkerValues.append(time)
                 xAxisMarkerValues[len(xAxisMarkerValues) -1] = str(xAxisMarkerValues[len(xAxisMarkerValues) -1]) + " s"
             else:
-                size = float(max(data[iter]['values'])) - float(min(data[iter]['values']))
+                size = float(max(data[iter]['values']))
                 average = sum(float(value) for value in data[iter]['values'])/len(data[iter]['values']);
-                plt.barh(average,Lenght, align='center', height=0.0113*size, linewidth = 0)
+                plt.barh(average,Lenght, align='center', height=0.000001, linewidth = 1, edgecolor = 'b', color= 'b')
                 markerSimbol = 'o'
                 lineStyle = 'None'
                 data[iter]['values'].insert(0, 0)
@@ -757,7 +757,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai 1.1.1'
+appTitle = 'Guoliu Gedimai 1.1.2'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
