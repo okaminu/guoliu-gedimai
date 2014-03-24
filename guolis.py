@@ -90,7 +90,7 @@ class Signal:
         self._coorLength = float(coorLength) /100
         self._hanningAllow = int(allowHanning)
         self._hanningWindowSize = int(hannSize)
-        self._SingleRollTime = int(1/float(1800/60)*1000)
+        self._SingleRollTime = int(1/float(int(rpm)/60)*1000)
         self._rolls = int(range)
         if(isRangeTime == 1):
             self._rolls = self.convertTimeToRolls(range)
@@ -330,9 +330,11 @@ class Signal:
         mean = np.mean(temp)
         for x in temp:
             disp = disp + np.power(x - mean, 2)
-        return disp / len(temp)
+        return round(disp / len(temp), 7)
 
-
+    def _calcStandardDeviation(self, data):
+        variance = self._calcDispersion(data)
+        return round(np.sqrt(variance), 7)
 
     def _calcRms(self, data):
         sum=0
@@ -494,7 +496,7 @@ class Signal:
 
     def _displayFreq(self, data, displayParams):
         self._lastFigure +=1
-        xAxisMarkerValues = ['0', '5', '10', '15', '20', '25 kHz']
+        xAxisMarkerValues = ['0', '3', '6', '9', '12', '15 kHz']
         plt.figure(self._lastFigure)
         subplots = 211
 
@@ -557,12 +559,14 @@ class Signal:
     def displayAllTime(self, displayParams):
         originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'}
         originalRMSDisplay = {'values' : self._originalRMSData,
-                              'title' : 'Originalus (Laikas) RMS, Dispersija = '+ str(self._calcDispersion(self._originalRMSData))}
+                              'title' : 'Originalus (Laikas) RMS, Dispersija = '+ str(self._calcDispersion(self._originalRMSData))
+                                +', Sigma = '+ str(self._calcStandardDeviation(self._originalRMSData))}
         self._displayTime({0:originalDisplay, 1: originalRMSDisplay}, displayParams, 's', 0, 1)
 
         cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'}
         cleanRMSDisplay = {'values' : self._cleanRMSData,
-                           'title' : 'Centruotas (Laikas) RMS, Dispersija = '+ str(self._calcDispersion(self._cleanRMSData))}
+                           'title' : 'Centruotas (Laikas) RMS, Dispersija = '+ str(self._calcDispersion(self._cleanRMSData))
+                            +', Sigma = '+ str(self._calcStandardDeviation(self._cleanRMSData))}
         self._displayTime({0:cleanDisplay, 1: cleanRMSDisplay}, displayParams, 's', 0, 1)
 
         meanDisplay = {'values' : self._meanFrame, 'title' : 'Originalo vidurkis (Laikas), RMS = '+ self._rmsMeanF()}
@@ -757,12 +761,12 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai 1.1.2'
+appTitle = 'Guoliu Gedimai 1.2'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
 button = wx.Button(frame, label="Vykdyti", pos=(170, 460))
-inputFile = wx.TextCtrl(frame,-1,pos=(200, 60), size=(110, 20), value=('m6.txt'))
+inputFile = wx.TextCtrl(frame,-1,pos=(200, 60), size=(110, 20), value=('m06s13.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(200, 90), size=(110, 20), value=(''))
 inputSkip = wx.TextCtrl(frame,-1,pos=(200, 150), size=(50, 20), value=('50'))
 inputRange = wx.TextCtrl(frame,-1,pos=(200, 180), size=(50, 20), value=('10'))
