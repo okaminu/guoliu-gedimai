@@ -71,11 +71,6 @@ class Signal:
         self._cleanDataCorr = []
         self._meanFrameCorr = []
         self._cleanTimeFrameCorr = []
-        self._originalDataFreqCorr = []
-        self._cleanDataFreqCorr = []
-        self._meanFrameFreqCorr = []
-        self._cleanTimeFrameFreqCorr = []
-        self._cleanFreqFrameCorr = []
         self._originalDataCeps = []
         self._cleanDataCeps = []
         self._meanFrameCeps = []
@@ -273,18 +268,12 @@ class Signal:
         self._cleanDataCorr = self.getSingleCoorelation(signal._cleanData, self._cleanData)
         self._meanFrameCorr = self.getSingleCoorelation(signal._meanFrame, self._meanFrame)
         self._cleanTimeFrameCorr = self.getSingleCoorelation(signal._cleanTimeFrame, self._cleanTimeFrame)
-        self._originalDataFreqCorr = self.getSingleCoorelation(signal._originalDataFreq, self._originalDataFreq)
-        self._cleanDataFreqCorr = self.getSingleCoorelation(signal._cleanDataFreq, self._cleanDataFreq)
-        self._meanFrameFreqCorr = self.getSingleCoorelation(signal._meanFrameFreq, self._meanFrameFreq)
-        self._cleanTimeFrameFreqCorr = self.getSingleCoorelation(signal._cleanTimeFrameFreq, self._cleanTimeFrameFreq)
-        self._cleanFreqFrameCorr = self.getSingleCoorelation(signal._cleanFreqFrame, self._cleanFreqFrame)
 
     def _calcCepstrums(self):
         self._originalDataCeps = self.cepstrum(self._originalData)
         self._cleanDataCeps = self.cepstrum(self._cleanData)
         self._meanFrameCeps = self.cepstrum(self._meanFrame)
         self._cleanTimeFrameCeps = self.cepstrum(self._cleanTimeFrame)
-
 
     def cepstrum(self, signal):
         # arr = []
@@ -605,17 +594,6 @@ class Signal:
         cleanFrameCorrDisplay = {'values' : self._cleanTimeFrameCorr, 'title' : 'Centruoto vidurkis (Laikas) Koreliacija'}
         self._displayCorr({0:meanCorrDisplay, 1: cleanFrameCorrDisplay}, displayParams)
 
-        origFreqCorrDisplay = {'values' : self._originalDataFreqCorr, 'title' : 'Originalus (Daznis) Koreliacija'}
-        cleanFreqCorrDisplay = {'values' : self._cleanDataFreqCorr, 'title' : 'Centruotas (Daznis) Koreliacija'}
-        self._displayCorr({0:origFreqCorrDisplay, 1: cleanFreqCorrDisplay}, displayParams)
-
-        meanFreqFrameCorrDisplay = {'values' : self._meanFrameFreqCorr, 'title' : 'Originalo vidurkis (Daznis) Koreliacija'}
-        cleanFreqFrameCorrDisplay = {'values' : self._cleanTimeFrameFreqCorr, 'title' : 'Centruoto vidurkis (Daznis) Koreliacija'}
-        self._displayCorr({0:meanFreqFrameCorrDisplay, 1: cleanFreqFrameCorrDisplay}, displayParams)
-
-        cleanFreqFrame2CorrDisplay = {'values' : self._cleanFreqFrameCorr, 'title' : 'Centruoto Signalo dazniu vidurkis Koreliacija'}
-        self._displayCorr({0: cleanFreqFrame2CorrDisplay}, displayParams)
-
     def displayAllData(self, color, signalName, isCorr = 0):
         self._saveRMS(signalName)
 
@@ -761,7 +739,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai 1.2'
+appTitle = 'Guoliu Gedimai 1.3'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
@@ -787,8 +765,8 @@ inputMaxTreshold = wx.TextCtrl(frame,-1,pos=(200, 420), size=(50, 20), value=('5
 inputIsHalfRoll = wx.CheckBox(frame,-1,pos=(200, 120), size=(50, 20))
 inputIsHalfRoll.SetValue(0)
 
-inputColumnSignal1 = wx.TextCtrl(frame,-1,pos=(320, 60), size=(50, 20), value=('3'))
-inputColumnSignal2 = wx.TextCtrl(frame,-1,pos=(320, 90), size=(50, 20), value=('3'))
+inputColumnSignal1 = wx.TextCtrl(frame,-1,pos=(320, 60), size=(50, 20), value=('1'))
+inputColumnSignal2 = wx.TextCtrl(frame,-1,pos=(320, 90), size=(50, 20), value=('1'))
 inputHanningAllow.SetValue(0)
 
 label0 = wx.StaticText(frame, -1, appTitle , pos=(30, 20))
