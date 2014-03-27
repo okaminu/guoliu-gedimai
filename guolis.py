@@ -44,9 +44,11 @@ class Signal:
         self._displayParams = 'g'
         self._originalData = []
         self._originalRMSData = []
+        self._originalRMSSigma = []
         self._originalDataFreq = []
         self._cleanData = []
         self._cleanRMSData = []
+        self._cleanRMSSigma = []
         self._cleanDataFreq = []
         self._meanFrame = []
         self._meanFrameFreq = []
@@ -325,10 +327,27 @@ class Signal:
         variance = self._calcDispersion(data)
         return round(np.sqrt(variance), 7)
 
+    def _calcSigmaForEachPoint(self, data):
+        disp = 0
+        temp = []
+        sigmaList = []
+
+        for y in data:
+            temp.append(float(y))
+
+        mean = np.mean(temp)
+        for x in temp:
+            disp = np.power(x - mean, 2)
+            variance = round(disp / len(temp), 7)
+            sigma = round(np.sqrt(variance), 7)
+            sigmaList.append(sigma)
+        return sigmaList
+
+
     def _calcRms(self, data):
         sum=0
         for itera in range(len(data)):
-            sum += math.pow(data[itera] * math.sin((2 * 3.14) * (50 * 0.0333)), 2)
+            sum += math.pow(data[itera], 2)
         aver = sum / len(data)
         return str(math.sqrt(aver))
 
@@ -356,6 +375,9 @@ class Signal:
     def _calcRMSForTime(self):
         self._originalRMSData = self.calcRmsForEachRoll(self._originalData)
         self._cleanRMSData = self.calcRmsForEachRoll(self._cleanData)
+
+    def _calcSigmaForRMS(self):
+        self._originalRMSSigma = self._calcSigmaForEachPoint(self._originalRMSData)
 
     def _saveRMS(self, fileName):
 
@@ -423,6 +445,11 @@ class Signal:
         for iter in range(len(data['values'])):
             file.writelines(str(data['values'][iter]) +"\n")
 
+
+    def _displayRMSSigma(self, data, displayParams, marking , grid, persist):
+        self._lastFigure +=1
+        self._drawDisplayTime(data, displayParams, self._lastFigure, marking, grid, persist, 'o')
+
     def _displayTime(self, data, displayParams, marking , grid, persist):
         Signal._lastTimeFigure+=1
         self._drawDisplayTime(data, displayParams, Signal._lastTimeFigure, marking, grid, persist)
@@ -431,7 +458,7 @@ class Signal:
         self._lastFigure +=1
         self._drawDisplayTime(data, displayParams, self._lastFigure, marking, grid)
 
-    def _drawDisplayTime(self, data, displayParams, figure, marking = 's', grid = 1, preserveFirstXAxis = 0):
+    def _drawDisplayTime(self, data, displayParams, figure, marking = 's', grid = 1, preserveFirstXAxis = 0, markerSimbol = ' '):
         plt.figure(figure)
         subplots = 211
         xAxisMarkerValues = []
@@ -446,7 +473,6 @@ class Signal:
             Lenght = float(len(data[iter]['values']))
             xAxisMarkerPlacement = [Lenght * 0, Lenght * 0.2, Lenght * 0.4, Lenght * 0.6, Lenght * 0.8, Lenght * 1]
 
-            markerSimbol = ' '
             lineStyle = '-'
             if preserveFirstXAxis == 0 or len(xAxisMarkerValues) == 0:
                 xAxisMarkerValues = []
@@ -594,12 +620,18 @@ class Signal:
         cleanFrameCorrDisplay = {'values' : self._cleanTimeFrameCorr, 'title' : 'Centruoto vidurkis (Laikas) Koreliacija'}
         self._displayCorr({0:meanCorrDisplay, 1: cleanFrameCorrDisplay}, displayParams)
 
+    def displayAllSigmas(self, displayParams):
+        rmsSigmaDisplay = {'values' : self._originalRMSSigma, 'title' : 'Originalus (Laikas) RMS\'o Sigma'}
+        self._displayRMSSigma({0:rmsSigmaDisplay}, displayParams,'ms', 0, 0)
+
     def displayAllData(self, color, signalName, isCorr = 0):
         self._saveRMS(signalName)
 
         displayParams = color
         self._lastFigure = Signal._lastTimeFigure
         # self.displayAllTime(displayParams)
+
+        self.displayAllSigmas(displayParams)
 
         self.displayAllFreq(displayParams)
 
@@ -658,6 +690,7 @@ class Signal:
         self._calcCepstrums()
         self._calcHanningWindow()
         self._calcRMSForTime()
+        self._calcSigmaForRMS()
 
 def execCalc(event):
 
@@ -716,6 +749,7 @@ def execCalc(event):
         signalDiff.substractFrom(signal2)
         signalDiff.calcCorrelation(signalDiff)
         signalDiff._calcRMSForTime()
+        signalDiff._calcSigmaForRMS()
 
         signal2.setDrawLegend(1)
         signalDiff.setDrawLegend(1)
@@ -739,7 +773,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai 1.3'
+appTitle = 'Guoliu Gedimai 1.5'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
