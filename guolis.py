@@ -572,13 +572,13 @@ class Signal:
         self.signalData.append(plt.Rectangle([0,0],1,1, fc = color))
 
     def displayAllTime(self, displayParams):
-        originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas)'}
+        originalDisplay = {'values' : self._originalData, 'title' : 'Originalus (Laikas), RMS = '+ self._rmsOriginal()}
         originalRMSDisplay = {'values' : self._originalRMSData,
                               'title' : 'Originalus (Laikas) RMS, Dispersija = '+ str(self._calcDispersion(self._originalRMSData))
                                 +', Sigma = '+ str(self._calcStandardDeviation(self._originalRMSData))}
         self._displayTime({0:originalDisplay, 1: originalRMSDisplay}, displayParams, 's', 0, 1)
 
-        cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas)'}
+        cleanDisplay = {'values' : self._cleanData, 'title' : 'Centruotas (Laikas), RMS = ' + self._rmsCleaned()}
         cleanRMSDisplay = {'values' : self._cleanRMSData,
                            'title' : 'Centruotas (Laikas) RMS, Dispersija = '+ str(self._calcDispersion(self._cleanRMSData))
                             +', Sigma = '+ str(self._calcStandardDeviation(self._cleanRMSData))}
