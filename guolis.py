@@ -756,7 +756,7 @@ def execCalc(event):
         signal2.displayAllTime(SignalParameters().SecondSignalColor)
         signalDiff.displayAllTime(SignalParameters().DifferenceSignalColor)
 
-        signalDiff.displayAllData(SignalParameters().DifferenceSignalColor, SignalParameters().DifferenceSignalName, 1)
+        signalDiff.displayAllData(SignalParameters().DifferenceSignalColor, SignalParameters().DifferenceSignalName)
         signal2.displayAllData(SignalParameters().SecondSignalColor, SignalParameters().SecondSignalName)
         signal2.saveMaxFrequencyDistance(SignalParameters().SecondSignalName)
         corrSignal = copy.deepcopy(signal2)
@@ -773,7 +773,7 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai 1.5'
+appTitle = 'Guoliu Gedimai 1.6'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
 frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
