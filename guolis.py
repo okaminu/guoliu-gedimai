@@ -206,16 +206,17 @@ class Signal:
 
         for itera in range(len(self._originalData)):
             if ((itera - 1) < 0):
-                x1 = 0;
+                x1 = 1;
             else:
                 x1 = self._originalData[itera-1];
 
             if ((itera - 2) < 0):
-                x2 = 0;
+                x2 = 1;
             else:
                 x2 = self._originalData[itera-2];
 
             self._originalData[itera] = (a[0]*x1)+(a[1]*x2)
+        print 'done'
 
 
     def calculateHanningWindow(self, count):
@@ -313,9 +314,13 @@ class Signal:
         convolution_size = len(table)
         table += [0] * (convolution_size * (pad_size - 1))
 
+        temp = abs(np.fft.fft(table))
         # compute the real cepstrum
         # fft -> abs + ln -> ifft -> real
-        cepstrum = np.fft.ifft(map(lambda x: math.log(x), abs(np.fft.fft(table))))
+        for i in range(len(temp)):
+            if temp[i] == 0:
+                temp[i]= 0.1
+        cepstrum = np.fft.ifft(map(lambda x: math.log(x), temp))
         # because the positive and negative freqs were equal, imaginary content is neglible
         # cepstrum = map(lambda x: x.real, cepstrum)
 
@@ -364,8 +369,8 @@ class Signal:
     def _calcRms(self, data):
         sum=0
         for itera in range(len(data)):
-            w = data[itera]
-            sum += math.pow(data[itera], 2)
+            w = round(data[itera], 8)
+            sum += round(math.pow(data[itera], 2))
         aver = sum / len(data)
         return str(math.sqrt(aver))
 
