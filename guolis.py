@@ -141,7 +141,6 @@ class Signal:
             self._originalData[single] = self._originalData[single] * self._proportion
 
     def _calcMeanFrame(self):
-
         bufIter = 0
         frameSize = self._frameSize
         originalData = self._originalData
@@ -200,6 +199,24 @@ class Signal:
                 bufIter=0
         self._cleanTimeFrame = cleanTimeFrame
         self._cleanFreqFrame = cleanFreqFrame
+
+    def _filterSignal(self):
+        result = []
+        a = [-0.78, 0.377]   # 2 eiles autoregresijos lygtis
+
+        for itera in range(len(self._originalData)):
+            if ((itera - 1) < 0):
+                x1 = 0;
+            else:
+                x1 = self._originalData[itera-1];
+
+            if ((itera - 2) < 0):
+                x2 = 0;
+            else:
+                x2 = self._originalData[itera-2];
+
+            self._originalData[itera] = (a[0]*x1)+(a[1]*x2)
+
 
     def calculateHanningWindow(self, count):
         result= []
@@ -347,6 +364,7 @@ class Signal:
     def _calcRms(self, data):
         sum=0
         for itera in range(len(data)):
+            w = data[itera]
             sum += math.pow(data[itera], 2)
         aver = sum / len(data)
         return str(math.sqrt(aver))
@@ -683,6 +701,7 @@ class Signal:
     def processSignalFromFile(self, location):
         self._loadOriginal_File(location)
         self._alterTimeSignal()
+        self._filterSignal()
         self._calcMeanFrame()
         self._cleanSignal()
         self._stackCleanSignalFrames_Time_Freq()
