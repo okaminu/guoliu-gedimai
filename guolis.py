@@ -78,8 +78,11 @@ class Signal:
         self._meanFrameCeps = []
         self._cleanTimeFrameCeps = []
         self._exportImages = 0
+        self._isFilter = 0
+        self._filterParam1 = 0
+        self._filterParam2 = 0
 
-    def __init__(self, range, frameSize, skip, freMark, rpm, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100, fileCol = 0, isHalfRoll = 0):
+    def __init__(self, range, frameSize, skip, freMark, rpm, isRangeTime, isSkipTime, hideFreq, hannSize, allowHanning, coorLength = 1, distanceTreshold = 100, fileCol = 0, isHalfRoll = 0, isFilter = 0, filterParam1 = 0, filterParam2 = 0):
         self._hideFreq = int(hideFreq)
         self.initValues()
         self._fileCol = int(fileCol)
@@ -102,6 +105,10 @@ class Signal:
         self._limit = self._skip + self._limit
         self._freMark = float(freMark)
         self._displayParams = self._displayParams
+
+        self._isFilter = isFilter
+        self._filterParam1 = filterParam1
+        self._filterParam2 = filterParam2
 
     # this is wrong and dirty on so many levels...
     @staticmethod
@@ -202,22 +209,15 @@ class Signal:
 
     def _filterSignal(self):
         result = []
-        a = [-0.78, 0.377]   # 2 eiles autoregresijos lygtis
+        a = [float(self._filterParam1), float(self._filterParam2)]   # 2 eiles autoregresijos lygtis
 
-        for itera in range(len(self._originalData)):
-            if ((itera - 1) < 0):
-                x1 = 1;
-            else:
-                x1 = self._originalData[itera-1];
-
-            if ((itera - 2) < 0):
-                x2 = 1;
-            else:
-                x2 = self._originalData[itera-2];
-
-            self._originalData[itera] = (a[0]*x1)+(a[1]*x2)
-        print 'done'
-
+        for itera in range(2, len(self._originalData)):
+            x1 = self._originalData[itera-0];
+            x2 = self._originalData[itera-1];
+            comp1 = (a[0]*x1)
+            comp2 = (a[1]*x2)
+            result = comp1+comp2
+            self._originalData[itera] = result
 
     def calculateHanningWindow(self, count):
         result= []
@@ -319,7 +319,7 @@ class Signal:
         # fft -> abs + ln -> ifft -> real
         for i in range(len(temp)):
             if temp[i] == 0:
-                temp[i]= 0.1
+                temp[i]= 0.0001
         cepstrum = np.fft.ifft(map(lambda x: math.log(x), temp))
         # because the positive and negative freqs were equal, imaginary content is neglible
         # cepstrum = map(lambda x: x.real, cepstrum)
@@ -548,7 +548,7 @@ class Signal:
             plt.bar(localFreMark, max(data[iter]['values']), width=0.8, edgecolor = '#CCCCCC')
 
             #Max display
-            freqMax = self.twoMax(data[iter]['values'])
+            # freqMax = self.twoMax(data[iter]['values'])
             # plt.bar(freqMax['firstIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
             # plt.bar(freqMax['secondIndex'], max(data[iter]['values']), width=0.8, edgecolor = '#0066FF')
 
@@ -706,7 +706,8 @@ class Signal:
     def processSignalFromFile(self, location):
         self._loadOriginal_File(location)
         self._alterTimeSignal()
-        self._filterSignal()
+        if self._isFilter == 1:
+            self._filterSignal()
         self._calcMeanFrame()
         self._cleanSignal()
         self._stackCleanSignalFrames_Time_Freq()
@@ -739,11 +740,13 @@ def execCalc(event):
             inputCoorelLength.GetValue(),
             inputMaxTreshold.GetValue(),
             inputColumnSignal1.GetValue(),
-            0
+            0,
+            inputIsFilter.GetValue(),
+            inputFilterParam1.GetValue(),
+            inputFilterParam2.GetValue()
         )
     signal1.processSignalFromFile('matavimai/'+ inputFile.GetValue())
     signal1.addToLegend('Rezonansas', '#CCCCCC')
-
     signal1.setDrawLegend(1)
     signal1.displayAllTime(SignalParameters().FirstSignalColor)
     corrSignal = signal1
@@ -762,7 +765,10 @@ def execCalc(event):
             inputCoorelLength.GetValue(),
             inputMaxTreshold.GetValue(),
             inputColumnSignal2.GetValue(),
-            inputIsHalfRoll.GetValue()
+            inputIsHalfRoll.GetValue(),
+            inputIsFilter.GetValue(),
+            inputFilterParam1.GetValue(),
+            inputFilterParam2.GetValue()
         )
 
         signal2.processSignalFromFile('matavimai/'+ inputFile2.GetValue())
@@ -782,14 +788,14 @@ def execCalc(event):
 
         signalDiff.displayAllData(SignalParameters().DifferenceSignalColor, SignalParameters().DifferenceSignalName)
         signal2.displayAllData(SignalParameters().SecondSignalColor, SignalParameters().SecondSignalName)
-        signal2.saveMaxFrequencyDistance(SignalParameters().SecondSignalName)
+        # signal2.saveMaxFrequencyDistance(SignalParameters().SecondSignalName)
         corrSignal = copy.deepcopy(signal2)
         del signalDiff
         del signal2
 
     signal1.calcCorrelation(corrSignal)
     signal1.displayAllData(SignalParameters().FirstSignalColor, SignalParameters().FirstSignalName, 1)
-    signal1.saveMaxFrequencyDistance(SignalParameters().FirstSignalName);
+    # signal1.saveMaxFrequencyDistance(SignalParameters().FirstSignalName);
     del signal1
     Signal.clearClassVariables()
     # Draw the plot to the screen
@@ -797,11 +803,11 @@ def execCalc(event):
 
 
 
-appTitle = 'Guoliu Gedimai 1.6'
+appTitle = 'Guoliu Gedimai 1.7'
 app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 560)) # A Frame is a top-level window.
+frame = wx.Frame(None, wx.ID_ANY, title=appTitle, size=(450, 590)) # A Frame is a top-level window.
 frame.Show(True)     # Show the frame.
-button = wx.Button(frame, label="Vykdyti", pos=(170, 460))
+button = wx.Button(frame, label="Vykdyti", pos=(170, 510))
 inputFile = wx.TextCtrl(frame,-1,pos=(200, 60), size=(110, 20), value=('m06s13.txt'))
 inputFile2 = wx.TextCtrl(frame,-1,pos=(200, 90), size=(110, 20), value=(''))
 inputSkip = wx.TextCtrl(frame,-1,pos=(200, 150), size=(50, 20), value=('50'))
@@ -820,7 +826,10 @@ inputHanningSize = wx.TextCtrl(frame,-1,pos=(200, 330), size=(50, 20), value=('0
 inputHanningAllow = wx.CheckBox(frame,-1,pos=(235, 360), size=(50, 20))
 inputCoorelLength = wx.TextCtrl(frame,-1,pos=(200, 390), size=(50, 20), value=('25'))
 inputMaxTreshold = wx.TextCtrl(frame,-1,pos=(200, 420), size=(50, 20), value=('500'))
+inputFilterParam1 = wx.TextCtrl(frame,-1,pos=(200, 480), size=(50, 20), value=('0.552'))
+inputFilterParam2 = wx.TextCtrl(frame,-1,pos=(280, 480), size=(50, 20), value=('0.568'))
 inputIsHalfRoll = wx.CheckBox(frame,-1,pos=(200, 120), size=(50, 20))
+inputIsFilter = wx.CheckBox(frame,-1,pos=(200, 450), size=(50, 20))
 inputIsHalfRoll.SetValue(0)
 
 inputColumnSignal1 = wx.TextCtrl(frame,-1,pos=(320, 60), size=(50, 20), value=('1'))
@@ -845,7 +854,9 @@ label4 = wx.StaticText(frame, -1,'Haningo lango dydis (Hz)', pos=(15, 330))
 label4 = wx.StaticText(frame, -1,'Haningo langas pirminiui signalui', pos=(15, 360))
 label15 = wx.StaticText(frame, -1,'Koreliacijos ilgis (%)', pos=(15, 390))
 label16 = wx.StaticText(frame, -1,'Maksimumu nuolydis (Hz)', pos=(15, 420))
-label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 510))
+label20 = wx.StaticText(frame, -1,'Filtravimas', pos=(15, 450))
+label20 = wx.StaticText(frame, -1,'Filtro modelio parametrai', pos=(15, 480))
+label12 = wx.StaticText(frame, -1,"Autorius: AurimasDGT", pos=(15, 540))
 label17 = wx.StaticText(frame, -1,"stulpelis", pos=(380, 60))
 label18 = wx.StaticText(frame, -1,"stulpelis", pos=(380, 90))
 
