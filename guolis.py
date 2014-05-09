@@ -211,13 +211,13 @@ class Signal:
         result = []
         a = [float(self._filterParam1), float(self._filterParam2)]   # 2 eiles autoregresijos lygtis
 
-        for itera in range(2, len(self._originalData)):
-            x1 = self._originalData[itera-0];
-            x2 = self._originalData[itera-1];
+        for itera in range(2, len(self._originalDataFreq)):
+            x1 = self._originalDataFreq[itera-0];
+            x2 = self._originalDataFreq[itera-1];
             comp1 = (a[0]*x1)
             comp2 = (a[1]*x2)
             result = comp1+comp2
-            self._originalData[itera] = result
+            self._originalDataFreq[itera] = result
 
     def calculateHanningWindow(self, count):
         result= []
@@ -706,12 +706,12 @@ class Signal:
     def processSignalFromFile(self, location):
         self._loadOriginal_File(location)
         self._alterTimeSignal()
-        if self._isFilter == 1:
-            self._filterSignal()
         self._calcMeanFrame()
         self._cleanSignal()
         self._stackCleanSignalFrames_Time_Freq()
         self._calcFreqSpectrums()
+        if self._isFilter == 1:
+            self._filterSignal()
         self._calcCepstrums()
         self._calcHanningWindow()
         self._calcRMSForTime()
